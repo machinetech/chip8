@@ -24,7 +24,8 @@ Tetris
 The windowing system was built with SDL2. Windows and Mac OSX binaries are available for [download](https://www.libsdl.org/download-2.0.php) from the SDL website. 
 
 **Ubuntu**:  
-sudo apt-get install libsdl2-dev
+sudo apt-get install libsdl2-dev   
+export LD\_LIBRARY\_PATH="${LD\_LIBRARY\_PATH}:/usr/local/lib"
 
 **MacPorts**:  
 sudo port install libsdl2  
