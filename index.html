@@ -20,9 +20,9 @@
 
     <section class="main-content">
       <h1>
-<a id="chip8" class="anchor" href="#chip8" aria-hidden="true"><span class="octicon octicon-link"></span></a>chip8</h1>
+<a id="chip-8" class="anchor" href="#chip-8" aria-hidden="true"><span class="octicon octicon-link"></span></a>CHIP-8</h1>
 
-<p>A chip8 emulator written in the <a href="http://www.rust-lang.org/">Rust</a> programming language. A few sample game screenshots below.</p>
+<p>A <a href="http://en.wikipedia.org/wiki/CHIP-8">CHIP-8</a> emulator written in the <a href="http://www.rust-lang.org/">Rust</a> programming language. A few sample game screenshots below.</p>
 
 <h2>
 <a id="overview" class="anchor" href="#overview" aria-hidden="true"><span class="octicon octicon-link"></span></a>Overview</h2>
@@ -66,9 +66,51 @@ brew install sdl2<br>
 export LIBRARY_PATH="${LIBRARY_PATH}:/usr/local/lib"</p>
 
 <h2>
-<a id="running" class="anchor" href="#running" aria-hidden="true"><span class="octicon octicon-link"></span></a>Running</h2>
+<a id="compile-and-run" class="anchor" href="#compile-and-run" aria-hidden="true"><span class="octicon octicon-link"></span></a>Compile and run</h2>
 
 <p>E.g., from inside the chip8 source folder: <strong>cargo run roms/brix.ch8</strong></p>
+
+<h2>
+<a id="keys" class="anchor" href="#keys" aria-hidden="true"><span class="octicon octicon-link"></span></a>Keys</h2>
+
+<p>The CHIP-8 specification has a 16 key hexadecimal keypad with the following layout:</p>
+
+<table>
+<thead>
+<tr>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>c</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>d</td>
+</tr>
+<tr>
+<td>7</td>
+<td>8</td>
+<td>9</td>
+<td>e</td>
+</tr>
+<tr>
+<td>a</td>
+<td>0</td>
+<td>b</td>
+<td>f</td>
+</tr>
+</tbody>
+</table>
+
+<h2>
+<a id="references" class="anchor" href="#references" aria-hidden="true"><span class="octicon octicon-link"></span></a>References</h2>
+
+<p><a href="http://devernay.free.fr/hacks/chip8/C8TECH10.HTM">Cowgod's Chip-8 Technical Reference</a><br>
+<a href="http://mattmik.com/chip8.html">MASTERING CHIP-8 by Matthew Mikolay</a></p>
 
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/wm9/chip8">chip8</a> is maintained by <a href="https://github.com/wm9">wm9</a>.</span>
