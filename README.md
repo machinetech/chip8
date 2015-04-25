@@ -1,5 +1,5 @@
-# chip8
-A chip8 emulator written in the [Rust](http://www.rust-lang.org/) programming language. A few sample game screenshots below.
+# CHIP-8
+A [CHIP-8](http://en.wikipedia.org/wiki/CHIP-8) emulator written in the [Rust](http://www.rust-lang.org/) programming language. A few sample game screenshots below.
 
 ## Overview
 This repository contains the source code for a chip8 emulator written in Rust. You will want to compile against the latest version of Rust. See the secion in the official Rust Book for [installing](http://doc.rust-lang.org/nightly/book/installing-rust.html) the Rust binaries, including the Rust package manager Cargo. 
@@ -34,5 +34,20 @@ export LIBRARY\_PATH="${LIBRARY\_PATH}:/opt/local/lib"
 brew install sdl2  
 export LIBRARY\_PATH="${LIBRARY\_PATH}:/usr/local/lib"
 
-## Running
+## Compile and run
 E.g., from inside the chip8 source folder: **cargo run roms/brix.ch8**
+
+## Keys
+The CHIP-8 specification has a 16 key hexadecimal keypad with the following layout:
+
+| 1 | 2  | 3 | c |
+| --- |---| ---| --- |
+| 4 | 5  | 6 | d |
+| 7 | 8  | 9 | e |
+| a | 0  | b | f |
+
+## References
+[Cowgod's Chip-8 Technical Reference](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM)   
+[MASTERING CHIP-8 by Matthew Mikolay](http://mattmik.com/chip8.html)
+
+
