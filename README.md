@@ -21,8 +21,6 @@ Tetris
 ![tetris.png](http://wm9.github.io/chip8/images/tetris.png "Tetris")
 
 ## Requirements
-Compile the binary using Rust
-
 The windowing system was built with SDL2. Windows and Mac OSX binaries are available for [download](https://www.libsdl.org/download-2.0.php) from the SDL website. 
 
 **Ubuntu**:  
