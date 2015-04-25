@@ -20,7 +20,8 @@
 
     <section class="main-content">
       <h1>
-<a id="chip-8" class="anchor" href="#chip-8" aria-hidden="true"><span class="octicon octicon-link"></span></a>CHIP-8</h1>
+<a id="chip-8-" class="anchor" href="#chip-8-" aria-hidden="true"><span class="octicon octicon-link"></span></a>CHIP-8 <a href="https://travis-ci.org/wm9/chip8"><img src="https://travis-ci.org/wm9/chip8.svg" alt="Build Status"></a>
+</h1>
 
 <p>A <a href="http://en.wikipedia.org/wiki/CHIP-8">CHIP-8</a> emulator written in the <a href="http://www.rust-lang.org/">Rust</a> programming language. A few sample game screenshots below.</p>
 
@@ -55,7 +56,8 @@
 <p>The windowing system was built with SDL2. Windows and Mac OSX binaries are available for <a href="https://www.libsdl.org/download-2.0.php">download</a> from the SDL website. </p>
 
 <p><strong>Ubuntu</strong>:<br>
-sudo apt-get install libsdl2-dev</p>
+sudo apt-get install libsdl2-dev<br>
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/lib"</p>
 
 <p><strong>MacPorts</strong>:<br>
 sudo port install libsdl2<br>
