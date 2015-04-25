@@ -22,7 +22,12 @@
       <h1>
 <a id="chip8" class="anchor" href="#chip8" aria-hidden="true"><span class="octicon octicon-link"></span></a>chip8</h1>
 
-<p>A chip8 emulator written in the Rust programming language. A few sample game screenshots below.</p>
+<p>A chip8 emulator written in the <a href="http://www.rust-lang.org/">Rust</a> programming language. A few sample game screenshots below.</p>
+
+<h2>
+<a id="overview" class="anchor" href="#overview" aria-hidden="true"><span class="octicon octicon-link"></span></a>Overview</h2>
+
+<p>This repository contains the source code for a chip8 emulator written in Rust. You will want to compile against the latest version of Rust. See the secion in the official Rust Book for <a href="http://doc.rust-lang.org/nightly/book/installing-rust.html">installing</a> the Rust binaries, including the Rust package manager Cargo. </p>
 
 <h2>
 <a id="brix" class="anchor" href="#brix" aria-hidden="true"><span class="octicon octicon-link"></span></a>Brix</h2>
@@ -47,6 +52,8 @@
 <h2>
 <a id="requirements" class="anchor" href="#requirements" aria-hidden="true"><span class="octicon octicon-link"></span></a>Requirements</h2>
 
+<p>Compile the binary using Rust</p>
+
 <p>The windowing system was built with SDL2. Windows and Mac OSX binaries are available for <a href="https://www.libsdl.org/download-2.0.php">download</a> from the SDL website. </p>
 
 <p><strong>Ubuntu</strong>:<br>
@@ -59,6 +66,11 @@ export LIBRARY_PATH="${LIBRARY_PATH}:/opt/local/lib"</p>
 <p><strong>HomeBrew</strong>:<br>
 brew install sdl2<br>
 export LIBRARY_PATH="${LIBRARY_PATH}:/usr/local/lib"</p>
+
+<h2>
+<a id="running" class="anchor" href="#running" aria-hidden="true"><span class="octicon octicon-link"></span></a>Running</h2>
+
+<p>E.g., from inside the chip8 source folder: <strong>cargo run roms/brix.ch8</strong></p>
 
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/wm9/chip8">chip8</a> is maintained by <a href="https://github.com/wm9">wm9</a>.</span>
