@@ -50,4 +50,8 @@ The CHIP-8 specification has a 16 key hexadecimal keypad with the following layo
 [Cowgod's Chip-8 Technical Reference](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM)   
 [MASTERING CHIP-8 by Matthew Mikolay](http://mattmik.com/chip8.html)
 
+## Travis CI automated build status
+[![Build Status](https://travis-ci.org/wm9/chip8.svg)](https://travis-ci.org/wm9/chip8)
+
+
 
