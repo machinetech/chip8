@@ -1,5 +1,8 @@
 # chip8
-A chip8 emulator written in the Rust programming language. A few sample game screenshots below.
+A chip8 emulator written in the [Rust](http://www.rust-lang.org/) programming language. A few sample game screenshots below.
+
+## Overview
+This repository contains the source code for a chip8 emulator written in Rust. You will want to compile against the latest version of Rust. See the secion in the official Rust Book for [installing](http://doc.rust-lang.org/nightly/book/installing-rust.html) the Rust binaries, including the Rust package manager Cargo. 
 
 Brix
 --- 
@@ -18,6 +21,8 @@ Tetris
 ![tetris.png](http://wm9.github.io/chip8/images/tetris.png "Tetris")
 
 ## Requirements
+Compile the binary using Rust
+
 The windowing system was built with SDL2. Windows and Mac OSX binaries are available for [download](https://www.libsdl.org/download-2.0.php) from the SDL website. 
 
 **Ubuntu**:  
@@ -30,3 +35,6 @@ export LIBRARY\_PATH="${LIBRARY\_PATH}:/opt/local/lib"
 **HomeBrew**:  
 brew install sdl2  
 export LIBRARY\_PATH="${LIBRARY\_PATH}:/usr/local/lib"
+
+## Running
+E.g., from inside the chip8 source folder: **cargo run roms/brix.ch8**
