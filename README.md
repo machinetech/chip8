@@ -1,5 +1,5 @@
 # CHIP-8 [![Build Status](https://travis-ci.org/wm9/chip8.svg)](https://travis-ci.org/wm9/chip8)
-A [CHIP-8](http://en.wikipedia.org/wiki/CHIP-8) emulator written in the [Rust](http://www.rust-lang.org/) programming language. A few sample game screenshots below. The project uses the [MIT](https://github.com/wm9/chip8/blob/master/LICENSE) license. 
+A [CHIP-8](http://en.wikipedia.org/wiki/CHIP-8) emulator written in the [Rust](http://www.rust-lang.org/) programming language. Although commonly referred to as an emulator, a more accurate description would be that of a virtual machine for interpreting the CHIP-8 programming language. A few sample game screenshots below. The project uses the [MIT](https://github.com/wm9/chip8/blob/master/LICENSE) license. 
 
 Brix
 --- 
@@ -10,6 +10,8 @@ There is also a short video clip of the game on [YouTube](http://www.youtube.com
 
 Space Invaders
 ---
+![space_invaders_title.png](http://wm9.github.io/chip8/images/space_invaders_title.png "Space Invaders Title")
+
 ![space_invaders.png](http://wm9.github.io/chip8/images/space_invaders.png "Space Invaders")
 
 Pong
