@@ -32,20 +32,20 @@ The emulator uses the cross platform media library [SDL2](https://www.libsdl.org
 
 ```
 sudo apt-get install libsdl2-dev
-export LD\_LIBRARY\_PATH="${LD\_LIBRARY\_PATH}:/usr/local/lib"
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/lib"
 ```
 **MacPorts**:  
 
 ```
 sudo port install libsdl2  
-export LIBRARY\_PATH="${LIBRARY\_PATH}:/opt/local/lib"
+export LIBRARY_PATH="${LIBRARY_PATH}:/opt/local/lib"
 ```
 
 **HomeBrew**:  
 
 ```
 brew install sdl2  
-export LIBRARY\_PATH="${LIBRARY\_PATH}:/usr/local/lib"
+export LIBRARY_PATH="${LIBRARY_PATH}:/usr/local/lib"
 ```
 
 ## Running games
