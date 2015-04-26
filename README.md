@@ -1,11 +1,12 @@
 # CHIP-8 [![Build Status](https://travis-ci.org/wm9/chip8.svg)](https://travis-ci.org/wm9/chip8)
-A [CHIP-8](http://en.wikipedia.org/wiki/CHIP-8) emulator written in the [Rust](http://www.rust-lang.org/) programming language. A few sample game screenshots below.
-
-The project uses the [MIT](https://github.com/wm9/chip8/blob/master/LICENSE) license. 
+A [CHIP-8](http://en.wikipedia.org/wiki/CHIP-8) emulator written in the [Rust](http://www.rust-lang.org/) programming language. A few sample game screenshots below. The project uses the [MIT](https://github.com/wm9/chip8/blob/master/LICENSE) license. 
 
 Brix
 --- 
-![brix.png](http://wm9.github.io/chip8/images/brix.png "Brix")
+
+[![Brix](http://wm9.github.io/chip8/images/brix.png)](http://www.youtube.com/watch?v=V3jA3SWWKOg)
+
+There is also a short video clip of the game on [YouTube](http://www.youtube.com/watch?v=V3jA3SWWKOg).
 
 Space Invaders
 ---
@@ -70,7 +71,6 @@ Below are some additional keypresses that are not in the official specification:
 | :--------------- | ----- |
 | Backspace or Delete | Reset |
 | Esc | Exit |
-
 
 ## References
 * [Cowgod's Chip-8 Technical Reference](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM)   
