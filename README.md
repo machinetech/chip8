@@ -57,7 +57,7 @@ cargo run roms/brix.ch8
 ```
 
 ## Keys
-The CHIP-8 specification has a 16 key hexadecimal keypad with the following layout:
+The original CHIP-8 specification had a 16 key hexadecimal keypad with the following layout:
 
 | 1 | 2  | 3 | c |
 | --- |---| ---| --- |
@@ -65,7 +65,15 @@ The CHIP-8 specification has a 16 key hexadecimal keypad with the following layo
 | 7 | 8  | 9 | e |
 | a | 0  | b | f |
 
-Below are some additional keypresses that are not in the official specification:
+However, for the sake of convenience, the layout has been remapped to onto a modern keyboard. Bear in mind that the documentation for ROMS found on the internet most likely will specify action keys in terms of the original mapping.
+
+| 1 | 2  | 3 | 4 |
+| --- |---| ---| --- |
+| q | w  | e | r |
+| a | s  | d | f |
+| z | x  | c | v |
+
+Below are some additional keypresses that are also not in the official specification:
 
 | Enter or Return | Pause |
 | :--------------- | ----- |

@@ -98,22 +98,22 @@ impl Ui {
     pub fn get_updated_keys() -> [bool; 16] {
         let keyboard_state = keyboard::get_keyboard_state();
         let mut keys = [false; 16];
-        keys[0x0] = Ui::get_key_state(&keyboard_state, KeyCode::Num0); 
+        keys[0x0] = Ui::get_key_state(&keyboard_state, KeyCode::X); 
         keys[0x1] = Ui::get_key_state(&keyboard_state, KeyCode::Num1); 
         keys[0x2] = Ui::get_key_state(&keyboard_state, KeyCode::Num2); 
         keys[0x3] = Ui::get_key_state(&keyboard_state, KeyCode::Num3); 
-        keys[0x4] = Ui::get_key_state(&keyboard_state, KeyCode::Num4); 
-        keys[0x5] = Ui::get_key_state(&keyboard_state, KeyCode::Num5); 
-        keys[0x6] = Ui::get_key_state(&keyboard_state, KeyCode::Num6); 
-        keys[0x7] = Ui::get_key_state(&keyboard_state, KeyCode::Num7); 
-        keys[0x8] = Ui::get_key_state(&keyboard_state, KeyCode::Num8); 
-        keys[0x9] = Ui::get_key_state(&keyboard_state, KeyCode::Num9); 
-        keys[0xA] = Ui::get_key_state(&keyboard_state, KeyCode::Q); 
-        keys[0xB] = Ui::get_key_state(&keyboard_state, KeyCode::A); 
-        keys[0xC] = Ui::get_key_state(&keyboard_state, KeyCode::Z); 
-        keys[0xD] = Ui::get_key_state(&keyboard_state, KeyCode::W); 
-        keys[0xE] = Ui::get_key_state(&keyboard_state, KeyCode::S); 
-        keys[0xF] = Ui::get_key_state(&keyboard_state, KeyCode::X); 
+        keys[0x4] = Ui::get_key_state(&keyboard_state, KeyCode::Q); 
+        keys[0x5] = Ui::get_key_state(&keyboard_state, KeyCode::W); 
+        keys[0x6] = Ui::get_key_state(&keyboard_state, KeyCode::E); 
+        keys[0x7] = Ui::get_key_state(&keyboard_state, KeyCode::A); 
+        keys[0x8] = Ui::get_key_state(&keyboard_state, KeyCode::S); 
+        keys[0x9] = Ui::get_key_state(&keyboard_state, KeyCode::D); 
+        keys[0xA] = Ui::get_key_state(&keyboard_state, KeyCode::Z); 
+        keys[0xB] = Ui::get_key_state(&keyboard_state, KeyCode::C); 
+        keys[0xC] = Ui::get_key_state(&keyboard_state, KeyCode::Num4); 
+        keys[0xD] = Ui::get_key_state(&keyboard_state, KeyCode::R); 
+        keys[0xE] = Ui::get_key_state(&keyboard_state, KeyCode::F); 
+        keys[0xF] = Ui::get_key_state(&keyboard_state, KeyCode::V); 
         keys
     }
 
