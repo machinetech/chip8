@@ -1,7 +1,10 @@
 [package]
 name = "chip8"
-version = "0.0.1"
+description = "A CHIP-8 emulator written in Rust"
+version = "0.1.0"
+license = "MIT"
 authors = ["wickus.martin <wickus.martin@gmail.com>"]
+keywords = ["chip8"]
 
 [[bin]]
 name = "chip8"
