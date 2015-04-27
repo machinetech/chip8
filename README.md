@@ -1,5 +1,5 @@
 # CHIP-8 [![Build Status](https://travis-ci.org/wm9/chip8.svg)](https://travis-ci.org/wm9/chip8)
-A [CHIP-8](http://en.wikipedia.org/wiki/CHIP-8) emulator written in the [Rust](http://www.rust-lang.org/) programming language. Although commonly referred to as an emulator, a more accurate description would be that of a virtual machine for interpreting the CHIP-8 programming language. A few sample game screenshots below. The project uses the [MIT](https://github.com/wm9/chip8/blob/master/LICENSE) license. 
+A [CHIP-8](http://en.wikipedia.org/wiki/CHIP-8) emulator written in the [Rust](http://www.rust-lang.org/) programming language. A few sample game screenshots below. The project uses the [MIT](https://github.com/wm9/chip8/blob/master/LICENSE) license. 
 
 Brix
 --- 
@@ -67,7 +67,7 @@ The original CHIP-8 specification had a 16 key hexadecimal keypad with the follo
 | 7 | 8  | 9 | e |
 | a | 0  | b | f |
 
-However, for the sake of convenience, the layout has been remapped to onto a modern keyboard. Bear in mind that the documentation for ROMS found on the internet most likely will specify action keys in terms of the original mapping.
+However, for the sake of convenience, the layout has been remapped onto a standard keyboard. Bear in mind that the documentation for ROMS found on the internet most likely will specify action keys according to the original mapping.
 
 | 1 | 2  | 3 | 4 |
 | --- |---| ---| --- |
@@ -81,6 +81,9 @@ Below are some additional keypresses that are also not in the official specifica
 | :--------------- | ----- |
 | Backspace or Delete | Reset |
 | Esc | Exit |
+
+## Reporting problems
+If anything should go wrong, please report the issue [here](https://github.com/wm9/chip8/issues) and I will look into it. Thanks!
 
 ## References
 * [Cowgod's Chip-8 Technical Reference](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM)   
