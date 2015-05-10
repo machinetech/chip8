@@ -3,14 +3,14 @@ use time::SteadyTime;
 
 pub struct Metronome {
     freq: Duration,
-    ticked_at: SteadyTime 
+    ticked_at: SteadyTime,
 }
 
 impl Metronome {
     
     pub fn new(hz: i64) -> Metronome {
         let freq = Metronome::hz_to_duration(hz);
-        Metronome {freq: freq, ticked_at: SteadyTime::now()}
+        Metronome { freq: freq, ticked_at: SteadyTime::now() }
     }
 
     pub fn on_tick<F>(&mut self, mut f: F) 

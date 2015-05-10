@@ -36,7 +36,7 @@ impl AudioCallback for BeepCallback {
 pub struct Ui {
     pub sdl_ctx: Sdl,
     pub renderer: Renderer<'static>,
-    pub audio: AudioDevice<BeepCallback> 
+    pub audio: AudioDevice<BeepCallback>,
 }
 
 impl Ui {
@@ -64,7 +64,7 @@ impl Ui {
             BeepCallback::new()
         }).unwrap();
 
-        Ui {sdl_ctx: sdl_ctx, renderer: renderer, audio: audio} 
+        Ui { sdl_ctx: sdl_ctx, renderer: renderer, audio: audio } 
     }
 
     pub fn beep(&self, on: bool) {

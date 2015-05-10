@@ -295,8 +295,7 @@ impl Emu {
     // implementation.
     //
     // Shifts vx right by one. Set vf to the value of the least significant
-    // bit of vx before the shift. This version seems to work best with
-    // the majority of the roms tested, e.g. Space Invaders. 
+    // bit of vx before the shift. 
     fn execute_opcode_8xy6(&mut self) {
         let x = (self.opcode & 0x0f00) >> 8; 
         self.v[0x0f] = self.v[x as usize] & 0x01;
