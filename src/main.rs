@@ -26,7 +26,7 @@ fn load_rom(emu: &mut Emu , path_to_rom: &Path) {
 
 // Messages that get passed from the ui to the emulator.
 enum UiToEmuMsg { Keys([bool; 16]), Paused(bool), Quit, Reset }
-//
+
 // Messages that get passed from the emulator to the ui.
 enum EmuToUiMsg { Beeping(bool), Draw([[bool; GFX_H]; GFX_W]), QuitAck }
 
@@ -48,72 +48,84 @@ fn ui_exec(mut ui: Ui, tx: Sender<UiToEmuMsg>, rx: Receiver<EmuToUiMsg>) {
     let mut refresh_gfx_rate = Metronome::new(120);
     let mut paused = false;
     'ui_exec_loop: loop {
-        // Poll for key presses.
-        match ui.sdl_ctx.event_pump().poll_event() {
-            None => {},
-            Some(event) => {
-                match event {
-                    Event::Quit{..} => {
-                        tx.send(UiToEmuMsg::Paused(paused)).unwrap(); 
+        poll_key_presses(&mut ui, &tx, &mut paused); 
+        if poll_emu_events(&mut ui, &rx, &paused, &mut refresh_gfx_rate) {
+            break 'ui_exec_loop;
+        }
+        // Short sleep to free up cpu cycles
+        thread::sleep_ms(1);    
+    }
+}
+
+// Poll for and handle key press events. 
+fn poll_key_presses(ui: &mut Ui, tx: &Sender<UiToEmuMsg>, 
+                    paused: &mut bool) {
+    match ui.sdl_ctx.event_pump().poll_event() {
+        None => {},
+        Some(event) => {
+            match event {
+                Event::Quit{..} => {
+                    tx.send(UiToEmuMsg::Paused(*paused)).unwrap(); 
+                },
+                Event::KeyDown{keycode,..} => match keycode {
+                    KeyCode::Escape => {
+                        // Signal emulator with intention to quit
+                        // and allow it to shutdown gracefully.
+                        tx.send(UiToEmuMsg::Quit).unwrap(); 
                     },
-                    Event::KeyDown{keycode,..} => match keycode {
-                        KeyCode::Escape => {
-                            // Signal emulator with intention to quit
-                            // and allow it to shutdown gracefully.
-                            tx.send(UiToEmuMsg::Quit).unwrap(); 
-                        },
-                        KeyCode::Return => {
-                            // Signal emulator to pause.
-                            paused ^= true; 
-                            tx.send(UiToEmuMsg::Paused(paused)).unwrap();
-                        },
-                        KeyCode::Backspace => {
-                            // Signal emulator to reset.
-                            tx.send(UiToEmuMsg::Reset).unwrap();
-                            paused = false;
-                            tx.send(UiToEmuMsg::Paused(paused)).unwrap();
-                        },
-                        _ => if !paused {
-                            // A key was pressed, signal emulator with updated
-                            // key states.
-                            tx.send(UiToEmuMsg::Keys(
-                                    Ui::get_updated_keys())).unwrap();
-                        }, 
+                    KeyCode::Return => {
+                        // Signal emulator to pause.
+                        *paused ^= true; 
+                        tx.send(UiToEmuMsg::Paused(*paused)).unwrap();
                     },
-                    Event::KeyUp{..} => if !paused {
-                        // A key was released, signal emulator with updated
+                    KeyCode::Backspace => {
+                        // Signal emulator to reset.
+                        tx.send(UiToEmuMsg::Reset).unwrap();
+                        *paused = false;
+                        tx.send(UiToEmuMsg::Paused(*paused)).unwrap();
+                    },
+                    _ => if !*paused {
+                        // A key was pressed, signal emulator with updated
                         // key states.
                         tx.send(UiToEmuMsg::Keys(
                                 Ui::get_updated_keys())).unwrap();
-                    },
-                    _ => {}
-                }
+                    }, 
+                },
+                Event::KeyUp{..} => if !*paused {
+                    // A key was released, signal emulator with updated
+                    // key states.
+                    tx.send(UiToEmuMsg::Keys(
+                            Ui::get_updated_keys())).unwrap();
+                },
+                _ => {}
             }
         }
-       
-        // Poll for emulator events.
-        match rx.try_recv() {
-            Ok(emu_event) => {
-                match emu_event {
-                    // Handle beeb state change signalled by emulator.
-                    EmuToUiMsg::Beeping(on) => ui.beep(on),
-                    // Handle draw event signalled by emulator.
-                    EmuToUiMsg::Draw(ref gfx) => {
-                        refresh_gfx_rate.on_tick(|| {
-                            if !paused { ui.refresh_gfx(gfx); }
-                        });
-                    },
-                    // Emulator has acknowledged the earlier quit signal.
-                    // The ui thread may shutdown in response.
-                    EmuToUiMsg::QuitAck => break 'ui_exec_loop,
-                }
-            },
-            _ => {},
-        }  
-        
-        // Sleep a tiny while to prevent eating up too many cpu cycles.
-        thread::sleep_ms(1);    
     }
+}
+
+// Poll for and handle emulator events. Returns true if emulator acknowledged 
+// quit. 
+fn poll_emu_events(ui: &mut Ui, rx: &Receiver<EmuToUiMsg>, paused: &bool, 
+                   refresh_gfx_rate: &mut Metronome) -> bool {
+    match rx.try_recv() {
+        Ok(emu_event) => {
+            match emu_event {
+                // Handle beeb state change signalled by emulator.
+                EmuToUiMsg::Beeping(on) => ui.beep(on),
+                // Handle draw event signalled by emulator.
+                EmuToUiMsg::Draw(ref gfx) => {
+                    refresh_gfx_rate.on_tick(|| {
+                        if !*paused { ui.refresh_gfx(gfx); }
+                    });
+                },
+                // Emulator has acknowledged the earlier quit signal.
+                // The ui thread may shutdown in response.
+                EmuToUiMsg::QuitAck => return true,
+            }
+        },
+        _ => {},
+    } 
+    false
 }
 
 // Drives the emulator. Communicates with the user interface by exchanging
@@ -178,7 +190,7 @@ fn emu_exec(mut emu: Emu, tx:Sender<EmuToUiMsg>, rx: Receiver<UiToEmuMsg>) {
             }                
         });
 
-        // Sleep a tiny while to prevent eating up too many cpu cycles.
+        // Short sleep to free up cpu cycles
         thread::sleep_ms(1);    
     }
 }
