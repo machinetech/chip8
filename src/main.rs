@@ -17,7 +17,7 @@ use std::sync::mpsc::{self, Sender, Receiver};
 use std::thread;
 
 // Load the emulator with the indicated ROM. 
-fn load_rom(emu: &mut Emu , path_to_rom: &Path) { 
+fn load_rom(emu: &mut Emu, path_to_rom: &Path) { 
     let mut file = File::open(&path_to_rom).unwrap();
     let mut rom: Vec<u8> = Vec::new();
     file.read_to_end(&mut rom).unwrap();
@@ -104,7 +104,7 @@ fn poll_key_presses(ui: &mut Ui, tx: &Sender<UiToEmuMsg>,
 }
 
 // Poll for and handle emulator events. Returns true if emulator acknowledged 
-// quit. 
+// earlier quit signal. 
 fn poll_emu_events(ui: &mut Ui, rx: &Receiver<EmuToUiMsg>, paused: &bool, 
                    refresh_gfx_rate: &mut Metronome) -> bool {
     match rx.try_recv() {
@@ -141,32 +141,18 @@ fn poll_emu_events(ui: &mut Ui, rx: &Receiver<EmuToUiMsg>, paused: &bool,
 // Arrows indicate data flow: 
 // ui <-> ui_exec <-> channel <-> emu_exec <-> emmulator
 //
-fn emu_exec(mut emu: Emu, tx:Sender<EmuToUiMsg>, rx: Receiver<UiToEmuMsg>) {
+fn emu_exec(mut emu: Emu, tx: Sender<EmuToUiMsg>, rx: Receiver<UiToEmuMsg>) {
     let mut clock_rate = Metronome::new(500);
     let mut update_timers_rate = Metronome::new(60);
     let mut paused = false;
     let mut beeping = false;
     
     'emu_exec_loop: loop {
-        // Poll for ui events.
-        match rx.try_recv() {
-            Ok(ui_to_emu_msg) => 
-                match ui_to_emu_msg {
-                    // New key press states.
-                    UiToEmuMsg::Keys(new_keys) => emu.keys = new_keys,
-                    // Reset everything.
-                    UiToEmuMsg::Reset => emu.reset(),
-                    // Pause or unpause.
-                    UiToEmuMsg::Paused(p) => paused = p,
-                    // Acknowledge quit and shut down gracefully.
-                    UiToEmuMsg::Quit => {
-                        tx.send(EmuToUiMsg::QuitAck).unwrap();
-                        break 'emu_exec_loop;
-                    }, 
-                },
-            _ => {},
-        }  
-       
+
+        if poll_ui_events(&mut emu, &tx, &rx, &mut paused) {
+            break 'emu_exec_loop;
+        }
+        
         // Signal ui with draw event.
         clock_rate.on_tick(|| {
             if !paused {
@@ -193,6 +179,29 @@ fn emu_exec(mut emu: Emu, tx:Sender<EmuToUiMsg>, rx: Receiver<UiToEmuMsg>) {
         // Short sleep to free up cpu cycles
         thread::sleep_ms(1);    
     }
+}
+
+// Poll for and handle UI events. Returns true if Quit signal received from UI.
+fn poll_ui_events(emu: &mut Emu, tx: &Sender<EmuToUiMsg>, 
+                  rx: &Receiver<UiToEmuMsg>, paused: &mut bool) -> bool {
+    match rx.try_recv() {
+        Ok(ui_to_emu_msg) => 
+            match ui_to_emu_msg {
+                // New key press states.
+                UiToEmuMsg::Keys(new_keys) => emu.keys = new_keys,
+                // Reset everything.
+                UiToEmuMsg::Reset => emu.reset(),
+                // Pause or unpause.
+                UiToEmuMsg::Paused(p) => *paused = p,
+                // Acknowledge quit and shut down gracefully.
+                UiToEmuMsg::Quit => {
+                    tx.send(EmuToUiMsg::QuitAck).unwrap();
+                    return true;
+                }, 
+            },
+        _ => {},
+    }  
+    false
 }
 
 // Entry point into the program. Takes care of basic setup such as reading
