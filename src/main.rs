@@ -35,8 +35,6 @@ enum EmuToUiMsg { Beeping(bool), Draw([[bool; GFX_H]; GFX_W]), QuitAck }
 // exchanging messages across a two way channel. 
 //
 // Runs on the main thread.
-// Allows the UI to be agnostic of the emulator (and the channels by
-// which we communicate with the emulator).
 fn ui_exec(mut ui: Ui, tx: Sender<UiToEmuMsg>, rx: Receiver<EmuToUiMsg>) {
     let mut refresh_gfx_rate = Metronome::new(120);
     let mut paused = false;
@@ -99,7 +97,7 @@ fn process_key_presses(ui: &mut Ui, tx: &Sender<UiToEmuMsg>,
 // Poll for and handle emulator events. Returns true if emulator acknowledged 
 // earlier quit signal. 
 fn process_emu_events(ui: &mut Ui, rx: &Receiver<EmuToUiMsg>, paused: &bool, 
-                   refresh_gfx_rate: &mut Metronome) -> bool {
+                      refresh_gfx_rate: &mut Metronome) -> bool {
     match rx.try_recv() {
         Ok(emu_event) => {
             match emu_event {
@@ -125,8 +123,6 @@ fn process_emu_events(ui: &mut Ui, rx: &Receiver<EmuToUiMsg>, paused: &bool,
 // messages across a two way channel. 
 //
 // Assigned its own thread. 
-// Allows the emulator to be agnostic of the ui (and the channels by
-// which we communicate with the ui).
 fn emu_exec(mut emu: Emu, tx: Sender<EmuToUiMsg>, rx: Receiver<UiToEmuMsg>) {
     let mut clock_rate = Metronome::new(500);
     let mut update_timers_rate = Metronome::new(60);
