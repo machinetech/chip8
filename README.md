@@ -82,6 +82,9 @@ Below are some additional keypresses that are also not in the official specifica
 | Backspace or Delete | Reset |
 | Esc | Exit |
 
+## Code diagram
+![pong.png](http://wm9.github.io/chip8/images/code_diagram.jpeg "Code diagram")
+
 ## Reporting problems
 If anything should go wrong, please report the issue [here](https://github.com/wm9/chip8/issues) and I will look into it. Thanks!
 
