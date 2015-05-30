@@ -37,19 +37,12 @@ enum EmuToUiMsg { Beeping(bool), Draw([[bool; GFX_H]; GFX_W]), QuitAck }
 // Runs on the main thread.
 // Allows the UI to be agnostic of the emulator (and the channels by
 // which we communicate with the emulator).
-//
-// Arrows indicate knowledge, not data flow:
-// ui <- ui_exec -> channel <- emu_exec -> emmulator
-// 
-// Arrows indicate data flow: 
-// ui <-> ui_exec <-> channel <-> emu_exec <-> emmulator
-//
 fn ui_exec(mut ui: Ui, tx: Sender<UiToEmuMsg>, rx: Receiver<EmuToUiMsg>) {
     let mut refresh_gfx_rate = Metronome::new(120);
     let mut paused = false;
     'ui_exec_loop: loop {
-        poll_key_presses(&mut ui, &tx, &mut paused); 
-        if poll_emu_events(&mut ui, &rx, &paused, &mut refresh_gfx_rate) {
+        process_key_presses(&mut ui, &tx, &mut paused); 
+        if process_emu_events(&mut ui, &rx, &paused, &mut refresh_gfx_rate) {
             break 'ui_exec_loop;
         }
         // Short sleep to free up cpu cycles
@@ -58,7 +51,7 @@ fn ui_exec(mut ui: Ui, tx: Sender<UiToEmuMsg>, rx: Receiver<EmuToUiMsg>) {
 }
 
 // Poll for and handle key press events. 
-fn poll_key_presses(ui: &mut Ui, tx: &Sender<UiToEmuMsg>, 
+fn process_key_presses(ui: &mut Ui, tx: &Sender<UiToEmuMsg>, 
                     paused: &mut bool) {
     match ui.sdl_ctx.event_pump().poll_event() {
         None => {},
@@ -105,7 +98,7 @@ fn poll_key_presses(ui: &mut Ui, tx: &Sender<UiToEmuMsg>,
 
 // Poll for and handle emulator events. Returns true if emulator acknowledged 
 // earlier quit signal. 
-fn poll_emu_events(ui: &mut Ui, rx: &Receiver<EmuToUiMsg>, paused: &bool, 
+fn process_emu_events(ui: &mut Ui, rx: &Receiver<EmuToUiMsg>, paused: &bool, 
                    refresh_gfx_rate: &mut Metronome) -> bool {
     match rx.try_recv() {
         Ok(emu_event) => {
@@ -134,56 +127,26 @@ fn poll_emu_events(ui: &mut Ui, rx: &Receiver<EmuToUiMsg>, paused: &bool,
 // Assigned its own thread. 
 // Allows the emulator to be agnostic of the ui (and the channels by
 // which we communicate with the ui).
-//
-// Arrows indicate knowledge, not data flow:
-// ui <- ui_exec -> channel <- emu_exec -> emmulator
-// 
-// Arrows indicate data flow: 
-// ui <-> ui_exec <-> channel <-> emu_exec <-> emmulator
-//
 fn emu_exec(mut emu: Emu, tx: Sender<EmuToUiMsg>, rx: Receiver<UiToEmuMsg>) {
     let mut clock_rate = Metronome::new(500);
     let mut update_timers_rate = Metronome::new(60);
     let mut paused = false;
     let mut beeping = false;
-    
     'emu_exec_loop: loop {
-
-        if poll_ui_events(&mut emu, &tx, &rx, &mut paused) {
+        if process_ui_events(&mut emu, &tx, &rx, &mut paused) {
             break 'emu_exec_loop;
         }
-        
-        // Signal ui with draw event.
-        clock_rate.on_tick(|| {
-            if !paused {
-                &mut emu.execute_cycle();
-                if emu.draw {
-                    tx.send(EmuToUiMsg::Draw(emu.gfx)).unwrap();
-                    emu.draw = false;
-                }
-             } 
-        });
-        
-        // Update emulator timers.
-        update_timers_rate.on_tick(|| {
-            if !paused { 
-                emu.update_timers(); 
-                if beeping != emu.beeping() {
-                    beeping ^= true; 
-                    // Signal ui with new beep state.
-                    tx.send(EmuToUiMsg::Beeping(beeping)).unwrap();
-                }
-            }                
-        });
-
+        signal_draw_event(&mut emu, &tx, &paused, &mut clock_rate); 
+        update_timers(&mut emu, &tx, &paused, &mut beeping, 
+                      &mut update_timers_rate);
         // Short sleep to free up cpu cycles
         thread::sleep_ms(1);    
     }
 }
 
 // Poll for and handle UI events. Returns true if Quit signal received from UI.
-fn poll_ui_events(emu: &mut Emu, tx: &Sender<EmuToUiMsg>, 
-                  rx: &Receiver<UiToEmuMsg>, paused: &mut bool) -> bool {
+fn process_ui_events(emu: &mut Emu, tx: &Sender<EmuToUiMsg>,  
+                     rx: &Receiver<UiToEmuMsg>, paused: &mut bool) -> bool {
     match rx.try_recv() {
         Ok(ui_to_emu_msg) => 
             match ui_to_emu_msg {
@@ -204,8 +167,36 @@ fn poll_ui_events(emu: &mut Emu, tx: &Sender<EmuToUiMsg>,
     false
 }
 
+// Signal the ui with a draw event.
+fn signal_draw_event(emu: &mut Emu, tx: &Sender<EmuToUiMsg>, paused: &bool,
+                     clock_rate: &mut Metronome) {
+    clock_rate.on_tick(|| {
+        if !paused {
+            &mut emu.execute_cycle();
+            if emu.draw {
+                tx.send(EmuToUiMsg::Draw(emu.gfx)).unwrap();
+                emu.draw = false;
+            }
+         } 
+    });
+}
+
+// Update the emulator timers and signal the ui if the beep state changed.
+fn update_timers(emu: &mut Emu, tx: &Sender<EmuToUiMsg>, paused: &bool, 
+                 beeping: &mut bool, update_timers_rate: &mut Metronome) {
+    update_timers_rate.on_tick(|| {
+        if !paused { 
+            emu.update_timers(); 
+            if *beeping != emu.beeping() {
+                *beeping ^= true; 
+                tx.send(EmuToUiMsg::Beeping(*beeping)).unwrap();
+            }
+        }                
+    });
+}
+
 // Entry point into the program. Takes care of basic setup such as reading
-// the ROM path from the command line and kicking off the ui and emulator.
+// the rom path from the command line and kicking off the ui and emulator.
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() != 2 {
