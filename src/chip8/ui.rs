@@ -1,5 +1,6 @@
 use sdl2;
 use sdl2::audio::{AudioCallback,AudioDevice,AudioSpecDesired};
+use sdl2::event::Event;
 use sdl2::keyboard;
 use sdl2::keycode::KeyCode;
 use sdl2::pixels::Color::RGB;
@@ -34,9 +35,9 @@ impl AudioCallback for BeepCallback {
 }
 
 pub struct Ui {
-    pub sdl_ctx: Sdl,
-    pub renderer: Renderer<'static>,
-    pub audio: AudioDevice<BeepCallback>,
+    sdl_ctx: Sdl,
+    renderer: Renderer<'static>,
+    audio: AudioDevice<BeepCallback>,
 }
 
 impl Ui {
@@ -78,7 +79,6 @@ impl Ui {
         let bg = RGB(0x1c, 0x28, 0x41);
         let fg = RGB(0xff, 0xff, 0xff);
         let mut drawer = self.renderer.drawer();
-        drawer.clear();
         for x in 0..GFX_W {
             for y in 0..GFX_H {
                 let pix_on = gfx[x][y];
@@ -94,6 +94,10 @@ impl Ui {
         }
         drawer.present();
     } 
+    
+    pub fn poll_event(&self) -> Option<Event> {
+        return self.sdl_ctx.event_pump().poll_event();
+    }
 
     pub fn get_updated_keys() -> [bool; 16] {
         let keyboard_state = keyboard::get_keyboard_state();

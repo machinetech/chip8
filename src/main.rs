@@ -51,7 +51,7 @@ fn ui_exec(mut ui: Ui, tx: Sender<UiToEmuMsg>, rx: Receiver<EmuToUiMsg>) {
 // Poll for and handle key press events. 
 fn process_key_presses(ui: &mut Ui, tx: &Sender<UiToEmuMsg>, 
                     paused: &mut bool) {
-    match ui.sdl_ctx.event_pump().poll_event() {
+    match ui.poll_event() {
         None => {},
         Some(event) => {
             match event {

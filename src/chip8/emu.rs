@@ -393,10 +393,10 @@ impl Emu {
                 let gfx_y = (gfx_start_y as usize + y_offset) % GFX_H;
                 let mask = 0b10000000 >> x_offset; 
                 let sprt_pix = sprt_row & mask != 0;
-                let gfx_pix_before = self.gfx[gfx_x][gfx_y]; 
-                let gfx_pix_after = gfx_pix_before ^ sprt_pix;
-                if gfx_pix_before != gfx_pix_after {
-                   self.gfx[gfx_x][gfx_y] = gfx_pix_after;
+                let gfx_pix = &mut self.gfx[gfx_x][gfx_y];
+                let gfx_pix_after = *gfx_pix ^ sprt_pix;
+                if *gfx_pix != gfx_pix_after {
+                   *gfx_pix = gfx_pix_after;
                    if gfx_pix_after {
                       self.draw = true; 
                    } else {
@@ -588,6 +588,23 @@ impl Emu {
 mod tests {
 
     use super::Emu;
+    use super::super::{GFX_H,GFX_W};
+    
+    #[test]
+    pub fn test_opcode_00e0() {
+        let mut emu = Emu::new();
+        //given
+        emu.pc = 0x0000; 
+        emu.draw = false;
+        for x in 0..GFX_W { for y in 0..GFX_H { emu.gfx[x][y] = true; } }
+        //when
+        emu.opcode = 0x00e0;
+        emu.decode_and_execute_opcode();
+        //then
+        for x in 0..GFX_W { for y in 0..GFX_H { assert_eq!(false, emu.gfx[x][y]); } }
+        assert_eq!(true, emu.draw);
+        assert_eq!(0x0000+2, emu.pc);
+    }
 
     #[test]
     pub fn test_opcode_00ee() {
@@ -1131,10 +1148,119 @@ mod tests {
     }
 
     #[test]
-    fn test_opcode_dxyn() {
+    fn test_opcode_dxyn_simple_draw() {
+        let mut emu = Emu::new();
+        //given
+        emu.pc = 0x0000; 
+        emu.draw = false;
+        emu.v[1] = 0x0005;
+        emu.v[2] = 0x0006;
+        emu.ram_idx = 0x222;
+        emu.ram[(emu.ram_idx+0) as usize] = 0b01010101 as u8;
+        emu.ram[(emu.ram_idx+1) as usize] = 0b11111111 as u8;
+
+        //when
+        emu.opcode = 0xd122;
+        emu.decode_and_execute_opcode();
+
+        //then
+        assert_eq!(false, emu.gfx[0x0005+0][0x0006]);
+        assert_eq!(true,  emu.gfx[0x0005+1][0x0006]);
+        assert_eq!(false, emu.gfx[0x0005+2][0x0006]);
+        assert_eq!(true,  emu.gfx[0x0005+3][0x0006]);
+        assert_eq!(false, emu.gfx[0x0005+4][0x0006]);
+        assert_eq!(true,  emu.gfx[0x0005+5][0x0006]);
+        assert_eq!(false, emu.gfx[0x0005+6][0x0006]);
+        assert_eq!(true,  emu.gfx[0x0005+7][0x0006]);
+
+        assert_eq!(true,  emu.gfx[0x0005+0][0x0006+1]);
+        assert_eq!(true,  emu.gfx[0x0005+1][0x0006+1]);
+        assert_eq!(true,  emu.gfx[0x0005+2][0x0006+1]);
+        assert_eq!(true,  emu.gfx[0x0005+3][0x0006+1]);
+        assert_eq!(true,  emu.gfx[0x0005+4][0x0006+1]);
+        assert_eq!(true,  emu.gfx[0x0005+5][0x0006+1]);
+        assert_eq!(true,  emu.gfx[0x0005+6][0x0006+1]);
+        assert_eq!(true,  emu.gfx[0x0005+7][0x0006+1]);
+        
+        assert_eq!(false, emu.draw);
+        assert_eq!(0x00, emu.v[0x0f]);
+        assert_eq!(0x0000+2, emu.pc);
+    }
+
+    #[test]
+    fn test_opcode_dxyn_simple_undraw() {
+        let mut emu = Emu::new();
+        //given
+        emu.pc = 0x0000; 
+        emu.draw = false;
+
+        emu.gfx[0x0005+0][0x006+0] = false;
+        emu.gfx[0x0005+1][0x006+0] = true;
+        emu.gfx[0x0005+2][0x006+0] = false;
+        emu.gfx[0x0005+3][0x006+0] = true;
+        emu.gfx[0x0005+4][0x006+0] = false;
+        emu.gfx[0x0005+5][0x006+0] = true;
+        emu.gfx[0x0005+6][0x006+0] = false;
+        emu.gfx[0x0005+7][0x006+0] = true;
+
+        emu.gfx[0x0005+0][0x006+1] = true;
+        emu.gfx[0x0005+1][0x006+1] = true;
+        emu.gfx[0x0005+2][0x006+1] = true;
+        emu.gfx[0x0005+3][0x006+1] = true;
+        emu.gfx[0x0005+4][0x006+1] = true;
+        emu.gfx[0x0005+5][0x006+1] = true;
+        emu.gfx[0x0005+6][0x006+1] = true;
+        emu.gfx[0x0005+7][0x006+1] = true;
+
+        emu.v[1] = 0x0005;
+        emu.v[2] = 0x0006;
+        emu.ram_idx = 0x222;
+        emu.ram[(emu.ram_idx+0) as usize] = 0b01010101 as u8;
+        emu.ram[(emu.ram_idx+1) as usize] = 0b11111111 as u8;
+        
+        //when
+        emu.opcode = 0xd122;
+        emu.decode_and_execute_opcode();
+        
+        //then
+        assert_eq!(false, emu.gfx[0x0005+0][0x0006+0]);
+        assert_eq!(false, emu.gfx[0x0005+1][0x0006+0]);
+        assert_eq!(false, emu.gfx[0x0005+2][0x0006+0]);
+        assert_eq!(false, emu.gfx[0x0005+3][0x0006+0]);
+        assert_eq!(false, emu.gfx[0x0005+4][0x0006+0]);
+        assert_eq!(false, emu.gfx[0x0005+5][0x0006+0]);
+        assert_eq!(false, emu.gfx[0x0005+6][0x0006+0]);
+        assert_eq!(false, emu.gfx[0x0005+7][0x0006+0]);
+
+        assert_eq!(false, emu.gfx[0x0005+0][0x0006+1]);
+        assert_eq!(false, emu.gfx[0x0005+1][0x0006+1]);
+        assert_eq!(false, emu.gfx[0x0005+2][0x0006+1]);
+        assert_eq!(false, emu.gfx[0x0005+3][0x0006+1]);
+        assert_eq!(false, emu.gfx[0x0005+4][0x0006+1]);
+        assert_eq!(false, emu.gfx[0x0005+5][0x0006+1]);
+        assert_eq!(false, emu.gfx[0x0005+6][0x0006+1]);
+        assert_eq!(false, emu.gfx[0x0005+7][0x0006+1]);
+        
+        assert_eq!(true, emu.draw);
+        assert_eq!(0x01, emu.v[0x0f]);
+        assert_eq!(0x0000+2, emu.pc);
+    }
+
+    #[test]
+    fn test_opcode_dxyn_simple_partial_redraw() {
         // todo
     }
 
+    #[test]
+    fn test_opcode_dxyn_overflow_width() {
+        // todo
+    }
+
+    #[test]
+    fn test_opcode_dxyn_overflow_height() {
+        // todo
+    }
+    
     #[test]
     fn test_opcode_ex9e_key_not_pressed() {
         let mut emu = Emu::new();
