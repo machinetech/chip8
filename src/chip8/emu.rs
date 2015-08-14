@@ -1182,7 +1182,7 @@ mod tests {
         assert_eq!(true,  emu.gfx[0x0005+6][0x0006+1]);
         assert_eq!(true,  emu.gfx[0x0005+7][0x0006+1]);
         
-        assert_eq!(false, emu.draw);
+        assert_eq!(true, emu.draw);
         assert_eq!(0x00, emu.v[0x0f]);
         assert_eq!(0x0000+2, emu.pc);
     }
@@ -1241,7 +1241,7 @@ mod tests {
         assert_eq!(false, emu.gfx[0x0005+6][0x0006+1]);
         assert_eq!(false, emu.gfx[0x0005+7][0x0006+1]);
         
-        assert_eq!(true, emu.draw);
+        assert_eq!(false, emu.draw);
         assert_eq!(0x01, emu.v[0x0f]);
         assert_eq!(0x0000+2, emu.pc);
     }
