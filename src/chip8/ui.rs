@@ -1,15 +1,11 @@
 use sdl2;
 use sdl2::audio::{AudioCallback,AudioDevice,AudioSpecDesired};
 use sdl2::event::Event;
-use sdl2::keyboard;
-use sdl2::keycode::KeyCode;
 use sdl2::pixels::Color::RGB;
 use sdl2::rect::Rect;
-use sdl2::render::{ACCELERATED,RenderDriverIndex,Renderer};
-use sdl2::scancode::ScanCode;
-use sdl2::video::{self,Window,WindowPos};
+use sdl2::render::Renderer;
+use sdl2::keyboard::Scancode;
 use sdl2::Sdl;
-use std::collections::HashMap;
 use super::{GFX_H,GFX_W,wav};
 
 const SCALE: usize = 16;
@@ -43,25 +39,26 @@ pub struct Ui {
 impl Ui {
     
     pub fn new() -> Self {
-        let sdl_ctx = sdl2::init(sdl2::INIT_EVERYTHING).unwrap();
-        let window = Window::new(&sdl_ctx,
-                                 "chip8", 
-                                 WindowPos::PosCentered,
-                                 WindowPos::PosCentered,
-                                 (GFX_W * SCALE) as i32, 
-                                 (GFX_H * SCALE) as i32,
-                                 video::SHOWN).unwrap();
+        let sdl_ctx = sdl2::init().unwrap();
+        let video_subsystem = sdl_ctx.video().unwrap();
+        let window = video_subsystem.window("chip8", 
+                                     (GFX_W * SCALE) as u32, 
+                                     (GFX_H * SCALE) as u32)
+                                    .position_centered()
+                                    .opengl()
+                                    .build()
+                                    .unwrap();
 
-        let renderer = Renderer::from_window(window, RenderDriverIndex::Auto, 
-                                             ACCELERATED).unwrap();
-
+        let renderer = window.renderer().build().unwrap(); 
+        
+        let audio_subsystem = sdl_ctx.audio().unwrap();
         let audio_spec = AudioSpecDesired {
             freq: Some(wav::SAMPLE_RATE_HZ as i32),
             channels: Some(wav::CHANNELS as u8),
             samples: Some(wav::SAMPLES as u16)
         };
     
-        let audio = AudioDevice::open_playback(None, audio_spec, |_| {
+        let audio = audio_subsystem.open_playback(None, audio_spec, |_| {
             BeepCallback::new()
         }).unwrap();
 
@@ -78,51 +75,48 @@ impl Ui {
     pub fn refresh_gfx(&mut self, gfx: &[[bool; GFX_H]; GFX_W]) {
         let bg = RGB(0x1c, 0x28, 0x41);
         let fg = RGB(0xff, 0xff, 0xff);
-        let mut drawer = self.renderer.drawer();
         for x in 0..GFX_W {
             for y in 0..GFX_H {
                 let pix_on = gfx[x][y];
                 let color = if pix_on {fg} else {bg};
                 let rx = (x * SCALE) as i32;
                 let ry = (y * SCALE) as i32;
-                let rw = SCALE as i32;
-                let rh = SCALE as i32;
-                let rect = Rect::new(rx, ry, rw, rh);
-                drawer.set_draw_color(color);
-                drawer.fill_rect(rect);
+                let rw = SCALE as u32;
+                let rh = SCALE as u32;
+                let rect = Rect::new(rx, ry, rw, rh).unwrap().unwrap();
+                self.renderer.set_draw_color(color);
+                self.renderer.fill_rect(rect);
             }
         }
-        drawer.present();
+        self.renderer.present();
     } 
     
     pub fn poll_event(&self) -> Option<Event> {
-        return self.sdl_ctx.event_pump().poll_event();
+        let mut event_pump = self.sdl_ctx.event_pump().unwrap();
+        return event_pump.poll_event();
     }
 
-    pub fn get_updated_keys() -> [bool; 16] {
-        let keyboard_state = keyboard::get_keyboard_state();
+    pub fn get_updated_keys(&self) -> [bool; 16] {
+        let event_pump = self.sdl_ctx.event_pump().unwrap();
+        let keyboard_state = event_pump.keyboard_state();
         let mut keys = [false; 16];
-        keys[0x0] = Ui::get_key_state(&keyboard_state, KeyCode::X); 
-        keys[0x1] = Ui::get_key_state(&keyboard_state, KeyCode::Num1); 
-        keys[0x2] = Ui::get_key_state(&keyboard_state, KeyCode::Num2); 
-        keys[0x3] = Ui::get_key_state(&keyboard_state, KeyCode::Num3); 
-        keys[0x4] = Ui::get_key_state(&keyboard_state, KeyCode::Q); 
-        keys[0x5] = Ui::get_key_state(&keyboard_state, KeyCode::W); 
-        keys[0x6] = Ui::get_key_state(&keyboard_state, KeyCode::E); 
-        keys[0x7] = Ui::get_key_state(&keyboard_state, KeyCode::A); 
-        keys[0x8] = Ui::get_key_state(&keyboard_state, KeyCode::S); 
-        keys[0x9] = Ui::get_key_state(&keyboard_state, KeyCode::D); 
-        keys[0xA] = Ui::get_key_state(&keyboard_state, KeyCode::Z); 
-        keys[0xB] = Ui::get_key_state(&keyboard_state, KeyCode::C); 
-        keys[0xC] = Ui::get_key_state(&keyboard_state, KeyCode::Num4); 
-        keys[0xD] = Ui::get_key_state(&keyboard_state, KeyCode::R); 
-        keys[0xE] = Ui::get_key_state(&keyboard_state, KeyCode::F); 
-        keys[0xF] = Ui::get_key_state(&keyboard_state, KeyCode::V); 
+        keys[0x0] = keyboard_state.is_scancode_pressed(Scancode::X);
+        keys[0x1] = keyboard_state.is_scancode_pressed(Scancode::Num1);
+        keys[0x2] = keyboard_state.is_scancode_pressed(Scancode::Num2);
+        keys[0x3] = keyboard_state.is_scancode_pressed(Scancode::Num3);
+        keys[0x4] = keyboard_state.is_scancode_pressed(Scancode::Q);
+        keys[0x5] = keyboard_state.is_scancode_pressed(Scancode::W);
+        keys[0x6] = keyboard_state.is_scancode_pressed(Scancode::E);
+        keys[0x7] = keyboard_state.is_scancode_pressed(Scancode::A);
+        keys[0x8] = keyboard_state.is_scancode_pressed(Scancode::S);
+        keys[0x9] = keyboard_state.is_scancode_pressed(Scancode::D);
+        keys[0xA] = keyboard_state.is_scancode_pressed(Scancode::Z);
+        keys[0xB] = keyboard_state.is_scancode_pressed(Scancode::C);
+        keys[0xC] = keyboard_state.is_scancode_pressed(Scancode::Num4);
+        keys[0xD] = keyboard_state.is_scancode_pressed(Scancode::R);
+        keys[0xE] = keyboard_state.is_scancode_pressed(Scancode::F);
+        keys[0xF] = keyboard_state.is_scancode_pressed(Scancode::V);
         keys
     }
 
-    fn get_key_state(kb_state: &HashMap<ScanCode, bool>, kc: KeyCode) -> bool {
-        let sc = keyboard::get_scancode_from_key(kc);
-        *kb_state.get(&sc).unwrap_or(&false)
-    }
 }

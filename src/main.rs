@@ -8,7 +8,7 @@ use chip8::emu::Emu;
 use chip8::ui::Ui;
 use chip8::metro::Metronome;
 use sdl2::event::Event;
-use sdl2::keycode::KeyCode;
+use sdl2::keyboard::Keycode;
 use std::env;
 use std::io::Read;
 use std::path::Path;
@@ -59,17 +59,17 @@ fn process_key_presses(ui: &mut Ui, tx: &Sender<UiToEmuMsg>,
                     tx.send(UiToEmuMsg::Paused(*paused)).unwrap(); 
                 },
                 Event::KeyDown{keycode,..} => match keycode {
-                    KeyCode::Escape => {
+                    Option::Some(Keycode::Escape) => {
                         // Signal emulator with intention to quit
                         // and allow it to shutdown gracefully.
                         tx.send(UiToEmuMsg::Quit).unwrap(); 
                     },
-                    KeyCode::Return => {
+                    Option::Some(Keycode::Return) => {
                         // Signal emulator to pause.
                         *paused ^= true; 
                         tx.send(UiToEmuMsg::Paused(*paused)).unwrap();
                     },
-                    KeyCode::Backspace => {
+                    Option::Some(Keycode::Backspace) => {
                         // Signal emulator to reset.
                         tx.send(UiToEmuMsg::Reset).unwrap();
                         *paused = false;
@@ -79,14 +79,14 @@ fn process_key_presses(ui: &mut Ui, tx: &Sender<UiToEmuMsg>,
                         // A key was pressed, signal emulator with updated
                         // key states.
                         tx.send(UiToEmuMsg::Keys(
-                                Ui::get_updated_keys())).unwrap();
+                                ui.get_updated_keys())).unwrap();
                     }, 
                 },
                 Event::KeyUp{..} => if !*paused {
                     // A key was released, signal emulator with updated
                     // key states.
                     tx.send(UiToEmuMsg::Keys(
-                            Ui::get_updated_keys())).unwrap();
+                            ui.get_updated_keys())).unwrap();
                 },
                 _ => {}
             }
