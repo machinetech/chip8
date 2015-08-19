@@ -45,7 +45,6 @@ impl Ui {
                                      (GFX_W * SCALE) as u32, 
                                      (GFX_H * SCALE) as u32)
                                     .position_centered()
-                                    .opengl()
                                     .build()
                                     .unwrap();
 

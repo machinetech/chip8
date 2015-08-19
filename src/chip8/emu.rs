@@ -21,12 +21,12 @@ const FONT_MAP: [u8; 5 * 16] = [
     0xf0, 0x10, 0x20, 0x40, 0x40, // 7
     0xf0, 0x90, 0xf0, 0x90, 0xf0, // 8
     0xf0, 0x90, 0xf0, 0x10, 0xf0, // 9
-    0xf0, 0x90, 0xf0, 0x90, 0x90, // a
-    0xe0, 0x90, 0xe0, 0x90, 0xe0, // b
-    0xf0, 0x80, 0x80, 0x80, 0xf0, // c
-    0xe0, 0x90, 0x90, 0x90, 0xe0, // d
-    0xf0, 0x80, 0xf0, 0x80, 0xf0, // e
-    0xf0, 0x80, 0xf0, 0x80, 0x80, // f
+    0xf0, 0x90, 0xf0, 0x90, 0x90, // A
+    0xe0, 0x90, 0xe0, 0x90, 0xe0, // B
+    0xf0, 0x80, 0x80, 0x80, 0xf0, // C
+    0xe0, 0x90, 0x90, 0x90, 0xe0, // D
+    0xf0, 0x80, 0xf0, 0x80, 0xf0, // E
+    0xf0, 0x80, 0xf0, 0x80, 0x80, // F
 ];
 
 pub struct Emu {
@@ -1164,14 +1164,14 @@ mod tests {
         emu.decode_and_execute_opcode();
 
         //then
-        assert_eq!(false, emu.gfx[0x0005+0][0x0006]);
-        assert_eq!(true,  emu.gfx[0x0005+1][0x0006]);
-        assert_eq!(false, emu.gfx[0x0005+2][0x0006]);
-        assert_eq!(true,  emu.gfx[0x0005+3][0x0006]);
-        assert_eq!(false, emu.gfx[0x0005+4][0x0006]);
-        assert_eq!(true,  emu.gfx[0x0005+5][0x0006]);
-        assert_eq!(false, emu.gfx[0x0005+6][0x0006]);
-        assert_eq!(true,  emu.gfx[0x0005+7][0x0006]);
+        assert_eq!(false, emu.gfx[0x0005+0][0x0006+0]);
+        assert_eq!(true,  emu.gfx[0x0005+1][0x0006+0]);
+        assert_eq!(false, emu.gfx[0x0005+2][0x0006+0]);
+        assert_eq!(true,  emu.gfx[0x0005+3][0x0006+0]);
+        assert_eq!(false, emu.gfx[0x0005+4][0x0006+0]);
+        assert_eq!(true,  emu.gfx[0x0005+5][0x0006+0]);
+        assert_eq!(false, emu.gfx[0x0005+6][0x0006+0]);
+        assert_eq!(true,  emu.gfx[0x0005+7][0x0006+0]);
 
         assert_eq!(true,  emu.gfx[0x0005+0][0x0006+1]);
         assert_eq!(true,  emu.gfx[0x0005+1][0x0006+1]);
@@ -1248,19 +1248,162 @@ mod tests {
 
     #[test]
     fn test_opcode_dxyn_simple_partial_redraw() {
-        // todo
+        let mut emu = Emu::new();
+        //given
+        emu.pc = 0x0000; 
+        emu.draw = false;
+
+        emu.gfx[0x0005+0][0x006+0] = false;
+        emu.gfx[0x0005+1][0x006+0] = true;
+        emu.gfx[0x0005+2][0x006+0] = false;
+        emu.gfx[0x0005+3][0x006+0] = true;
+        emu.gfx[0x0005+4][0x006+0] = false;
+        emu.gfx[0x0005+5][0x006+0] = false;
+        emu.gfx[0x0005+6][0x006+0] = false;
+        emu.gfx[0x0005+7][0x006+0] = false;
+
+        emu.gfx[0x0005+0][0x006+1] = true;
+        emu.gfx[0x0005+1][0x006+1] = true;
+        emu.gfx[0x0005+2][0x006+1] = true;
+        emu.gfx[0x0005+3][0x006+1] = true;
+        emu.gfx[0x0005+4][0x006+1] = true;
+        emu.gfx[0x0005+5][0x006+1] = true;
+        emu.gfx[0x0005+6][0x006+1] = true;
+        emu.gfx[0x0005+7][0x006+1] = true;
+
+        emu.v[1] = 0x0005;
+        emu.v[2] = 0x0006;
+        emu.ram_idx = 0x222;
+        emu.ram[(emu.ram_idx+0) as usize] = 0b11111111 as u8;
+        emu.ram[(emu.ram_idx+1) as usize] = 0b11110000 as u8;
+        
+        //when
+        emu.opcode = 0xd122;
+        emu.decode_and_execute_opcode();
+        
+        //then
+        assert_eq!(true,  emu.gfx[0x0005+0][0x0006+0]);
+        assert_eq!(false, emu.gfx[0x0005+1][0x0006+0]);
+        assert_eq!(true,  emu.gfx[0x0005+2][0x0006+0]);
+        assert_eq!(false, emu.gfx[0x0005+3][0x0006+0]);
+        assert_eq!(true,  emu.gfx[0x0005+4][0x0006+0]);
+        assert_eq!(true,  emu.gfx[0x0005+5][0x0006+0]);
+        assert_eq!(true,  emu.gfx[0x0005+6][0x0006+0]);
+        assert_eq!(true,  emu.gfx[0x0005+7][0x0006+0]);
+
+        assert_eq!(false, emu.gfx[0x0005+0][0x0006+1]);
+        assert_eq!(false, emu.gfx[0x0005+1][0x0006+1]);
+        assert_eq!(false, emu.gfx[0x0005+2][0x0006+1]);
+        assert_eq!(false, emu.gfx[0x0005+3][0x0006+1]);
+        assert_eq!(true,  emu.gfx[0x0005+4][0x0006+1]);
+        assert_eq!(true,  emu.gfx[0x0005+5][0x0006+1]);
+        assert_eq!(true,  emu.gfx[0x0005+6][0x0006+1]);
+        assert_eq!(true,  emu.gfx[0x0005+7][0x0006+1]);
+        
+        assert_eq!(true, emu.draw);
+        assert_eq!(0x01, emu.v[0x0f]);
+        assert_eq!(0x0000+2, emu.pc);
     }
 
+    #[test]
+    fn test_opcode_dxyn_underflow_width() {
+        // todo
+    }
+    
     #[test]
     fn test_opcode_dxyn_overflow_width() {
         // todo
     }
 
     #[test]
+    fn test_opcode_dxyn_underflow_height() {
+        // todo
+    }
+    
+    #[test]
     fn test_opcode_dxyn_overflow_height() {
         // todo
     }
     
+    #[test]
+    fn test_opcode_dxyn_draw_font_0() {
+        let mut emu = Emu::new();
+        //given
+        let fchar = 0x0; 
+        emu.ram_idx = 0x0000 + (fchar as u16) * 5; 
+        emu.pc = 0x0000;
+        //when
+        emu.opcode = 0xd005;
+        emu.decode_and_execute_opcode();
+        //then
+        assert_eq!(txt_to_byte("####"), booleans_to_byte(&emu.gfx, 0, 0));
+        assert_eq!(txt_to_byte("#  #"), booleans_to_byte(&emu.gfx, 0, 1));
+        assert_eq!(txt_to_byte("#  #"), booleans_to_byte(&emu.gfx, 0, 2));
+        assert_eq!(txt_to_byte("#  #"), booleans_to_byte(&emu.gfx, 0, 3));
+        assert_eq!(txt_to_byte("####"), booleans_to_byte(&emu.gfx, 0, 4));
+        assert_eq!(true, emu.draw);
+        assert_eq!(0x00, emu.v[0x0f]);
+        assert_eq!(0x0000+2, emu.pc);
+    }
+
+    #[test]
+    fn test_opcode_dxyn_draw_font_1() {
+        let mut emu = Emu::new();
+        //given
+        let fchar = 0x1; 
+        emu.ram_idx = 0x0000 + (fchar as u16) * 5; 
+        emu.pc = 0x0000;
+        //when
+        emu.opcode = 0xd005;
+        emu.decode_and_execute_opcode();
+        //then
+        assert_eq!(txt_to_byte("  # "), booleans_to_byte(&emu.gfx, 0, 0));
+        assert_eq!(txt_to_byte(" ## "), booleans_to_byte(&emu.gfx, 0, 1));
+        assert_eq!(txt_to_byte("  # "), booleans_to_byte(&emu.gfx, 0, 2));
+        assert_eq!(txt_to_byte("  # "), booleans_to_byte(&emu.gfx, 0, 3));
+        assert_eq!(txt_to_byte(" ###"), booleans_to_byte(&emu.gfx, 0, 4));
+        assert_eq!(true, emu.draw);
+        assert_eq!(0x00, emu.v[0x0f]);
+        assert_eq!(0x0000+2, emu.pc);
+    }
+
+    #[test]
+    fn test_opcode_dxyn_draw_font_2() {
+        let mut emu = Emu::new();
+        //given
+        let fchar = 0x2; 
+        emu.ram_idx = 0x0000 + (fchar as u16) * 5; 
+        emu.pc = 0x0000;
+        //when
+        emu.opcode = 0xd005;
+        emu.decode_and_execute_opcode();
+        //then
+        assert_eq!(txt_to_byte("####"), booleans_to_byte(&emu.gfx, 0, 0));
+        assert_eq!(txt_to_byte("   #"), booleans_to_byte(&emu.gfx, 0, 1));
+        assert_eq!(txt_to_byte("####"), booleans_to_byte(&emu.gfx, 0, 2));
+        assert_eq!(txt_to_byte("#   "), booleans_to_byte(&emu.gfx, 0, 3));
+        assert_eq!(txt_to_byte("####"), booleans_to_byte(&emu.gfx, 0, 4));
+        assert_eq!(true, emu.draw);
+        assert_eq!(0x00, emu.v[0x0f]);
+        assert_eq!(0x0000+2, emu.pc);
+    }
+
+    fn txt_to_byte(txt: &str) -> u8 {
+        let mut bits: u8 = 0b000000000;
+        for (i,c) in txt.chars().enumerate() {
+            bits |= if c == '#' {0b10000000} else {0b00000000} >> i;
+        }
+        bits
+    }
+
+    fn booleans_to_byte(gfx: &[[bool; GFX_H]; GFX_W], x: usize, y: usize) -> u8 {
+        let mut bits: u8 = 0b00000000;
+        for i in 0..8 {
+            bits |= if gfx[x+i][y] {0b10000000} else {0b00000000} >> i; 
+        }
+        bits
+    }
+
     #[test]
     fn test_opcode_ex9e_key_not_pressed() {
         let mut emu = Emu::new();
