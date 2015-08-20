@@ -1388,6 +1388,279 @@ mod tests {
         assert_eq!(0x0000+2, emu.pc);
     }
 
+    #[test]
+    fn test_opcode_dxyn_draw_font_3() {
+        let mut emu = Emu::new();
+        //given
+        let fchar = 0x3; 
+        emu.ram_idx = 0x0000 + (fchar as u16) * 5; 
+        emu.pc = 0x0000;
+        //when
+        emu.opcode = 0xd005;
+        emu.decode_and_execute_opcode();
+        //then
+        assert_eq!(txt_to_byte("####"), booleans_to_byte(&emu.gfx, 0, 0));
+        assert_eq!(txt_to_byte("   #"), booleans_to_byte(&emu.gfx, 0, 1));
+        assert_eq!(txt_to_byte("####"), booleans_to_byte(&emu.gfx, 0, 2));
+        assert_eq!(txt_to_byte("   #"), booleans_to_byte(&emu.gfx, 0, 3));
+        assert_eq!(txt_to_byte("####"), booleans_to_byte(&emu.gfx, 0, 4));
+        assert_eq!(true, emu.draw);
+        assert_eq!(0x00, emu.v[0x0f]);
+        assert_eq!(0x0000+2, emu.pc);
+    }
+
+    #[test]
+    fn test_opcode_dxyn_draw_font_4() {
+        let mut emu = Emu::new();
+        //given
+        let fchar = 0x4; 
+        emu.ram_idx = 0x0000 + (fchar as u16) * 5; 
+        emu.pc = 0x0000;
+        //when
+        emu.opcode = 0xd005;
+        emu.decode_and_execute_opcode();
+        //then
+        assert_eq!(txt_to_byte("#  #"), booleans_to_byte(&emu.gfx, 0, 0));
+        assert_eq!(txt_to_byte("#  #"), booleans_to_byte(&emu.gfx, 0, 1));
+        assert_eq!(txt_to_byte("####"), booleans_to_byte(&emu.gfx, 0, 2));
+        assert_eq!(txt_to_byte("   #"), booleans_to_byte(&emu.gfx, 0, 3));
+        assert_eq!(txt_to_byte("   #"), booleans_to_byte(&emu.gfx, 0, 4));
+        assert_eq!(true, emu.draw);
+        assert_eq!(0x00, emu.v[0x0f]);
+        assert_eq!(0x0000+2, emu.pc);
+    }
+
+    #[test]
+    fn test_opcode_dxyn_draw_font_5() {
+        let mut emu = Emu::new();
+        //given
+        let fchar = 0x5; 
+        emu.ram_idx = 0x0000 + (fchar as u16) * 5; 
+        emu.pc = 0x0000;
+        //when
+        emu.opcode = 0xd005;
+        emu.decode_and_execute_opcode();
+        //then
+        assert_eq!(txt_to_byte("####"), booleans_to_byte(&emu.gfx, 0, 0));
+        assert_eq!(txt_to_byte("#   "), booleans_to_byte(&emu.gfx, 0, 1));
+        assert_eq!(txt_to_byte("####"), booleans_to_byte(&emu.gfx, 0, 2));
+        assert_eq!(txt_to_byte("   #"), booleans_to_byte(&emu.gfx, 0, 3));
+        assert_eq!(txt_to_byte("####"), booleans_to_byte(&emu.gfx, 0, 4));
+        assert_eq!(true, emu.draw);
+        assert_eq!(0x00, emu.v[0x0f]);
+        assert_eq!(0x0000+2, emu.pc);
+    }
+
+    #[test]
+    fn test_opcode_dxyn_draw_font_6() {
+        let mut emu = Emu::new();
+        //given
+        let fchar = 0x6; 
+        emu.ram_idx = 0x0000 + (fchar as u16) * 5; 
+        emu.pc = 0x0000;
+        //when
+        emu.opcode = 0xd005;
+        emu.decode_and_execute_opcode();
+        //then
+        assert_eq!(txt_to_byte("####"), booleans_to_byte(&emu.gfx, 0, 0));
+        assert_eq!(txt_to_byte("#   "), booleans_to_byte(&emu.gfx, 0, 1));
+        assert_eq!(txt_to_byte("####"), booleans_to_byte(&emu.gfx, 0, 2));
+        assert_eq!(txt_to_byte("#  #"), booleans_to_byte(&emu.gfx, 0, 3));
+        assert_eq!(txt_to_byte("####"), booleans_to_byte(&emu.gfx, 0, 4));
+        assert_eq!(true, emu.draw);
+        assert_eq!(0x00, emu.v[0x0f]);
+        assert_eq!(0x0000+2, emu.pc);
+    }
+
+    #[test]
+    fn test_opcode_dxyn_draw_font_7() {
+        let mut emu = Emu::new();
+        //given
+        let fchar = 0x7; 
+        emu.ram_idx = 0x0000 + (fchar as u16) * 5; 
+        emu.pc = 0x0000;
+        //when
+        emu.opcode = 0xd005;
+        emu.decode_and_execute_opcode();
+        //then
+        assert_eq!(txt_to_byte("####"), booleans_to_byte(&emu.gfx, 0, 0));
+        assert_eq!(txt_to_byte("   #"), booleans_to_byte(&emu.gfx, 0, 1));
+        assert_eq!(txt_to_byte("  # "), booleans_to_byte(&emu.gfx, 0, 2));
+        assert_eq!(txt_to_byte(" #  "), booleans_to_byte(&emu.gfx, 0, 3));
+        assert_eq!(txt_to_byte(" #  "), booleans_to_byte(&emu.gfx, 0, 4));
+        assert_eq!(true, emu.draw);
+        assert_eq!(0x00, emu.v[0x0f]);
+        assert_eq!(0x0000+2, emu.pc);
+    }
+
+    #[test]
+    fn test_opcode_dxyn_draw_font_8() {
+        let mut emu = Emu::new();
+        //given
+        let fchar = 0x8; 
+        emu.ram_idx = 0x0000 + (fchar as u16) * 5; 
+        emu.pc = 0x0000;
+        //when
+        emu.opcode = 0xd005;
+        emu.decode_and_execute_opcode();
+        //then
+        assert_eq!(txt_to_byte("####"), booleans_to_byte(&emu.gfx, 0, 0));
+        assert_eq!(txt_to_byte("#  #"), booleans_to_byte(&emu.gfx, 0, 1));
+        assert_eq!(txt_to_byte("####"), booleans_to_byte(&emu.gfx, 0, 2));
+        assert_eq!(txt_to_byte("#  #"), booleans_to_byte(&emu.gfx, 0, 3));
+        assert_eq!(txt_to_byte("####"), booleans_to_byte(&emu.gfx, 0, 4));
+        assert_eq!(true, emu.draw);
+        assert_eq!(0x00, emu.v[0x0f]);
+        assert_eq!(0x0000+2, emu.pc);
+    }
+
+    #[test]
+    fn test_opcode_dxyn_draw_font_9() {
+        let mut emu = Emu::new();
+        //given
+        let fchar = 0x9; 
+        emu.ram_idx = 0x0000 + (fchar as u16) * 5; 
+        emu.pc = 0x0000;
+        //when
+        emu.opcode = 0xd005;
+        emu.decode_and_execute_opcode();
+        //then
+        assert_eq!(txt_to_byte("####"), booleans_to_byte(&emu.gfx, 0, 0));
+        assert_eq!(txt_to_byte("#  #"), booleans_to_byte(&emu.gfx, 0, 1));
+        assert_eq!(txt_to_byte("####"), booleans_to_byte(&emu.gfx, 0, 2));
+        assert_eq!(txt_to_byte("   #"), booleans_to_byte(&emu.gfx, 0, 3));
+        assert_eq!(txt_to_byte("####"), booleans_to_byte(&emu.gfx, 0, 4));
+        assert_eq!(true, emu.draw);
+        assert_eq!(0x00, emu.v[0x0f]);
+        assert_eq!(0x0000+2, emu.pc);
+    }
+
+    #[test]
+    fn test_opcode_dxyn_draw_font_A() {
+        let mut emu = Emu::new();
+        //given
+        let fchar = 0xA; 
+        emu.ram_idx = 0x0000 + (fchar as u16) * 5; 
+        emu.pc = 0x0000;
+        //when
+        emu.opcode = 0xd005;
+        emu.decode_and_execute_opcode();
+        //then
+        assert_eq!(txt_to_byte("####"), booleans_to_byte(&emu.gfx, 0, 0));
+        assert_eq!(txt_to_byte("#  #"), booleans_to_byte(&emu.gfx, 0, 1));
+        assert_eq!(txt_to_byte("####"), booleans_to_byte(&emu.gfx, 0, 2));
+        assert_eq!(txt_to_byte("#  #"), booleans_to_byte(&emu.gfx, 0, 3));
+        assert_eq!(txt_to_byte("#  #"), booleans_to_byte(&emu.gfx, 0, 4));
+        assert_eq!(true, emu.draw);
+        assert_eq!(0x00, emu.v[0x0f]);
+        assert_eq!(0x0000+2, emu.pc);
+    }
+
+    #[test]
+    fn test_opcode_dxyn_draw_font_B() {
+        let mut emu = Emu::new();
+        //given
+        let fchar = 0xB; 
+        emu.ram_idx = 0x0000 + (fchar as u16) * 5; 
+        emu.pc = 0x0000;
+        //when
+        emu.opcode = 0xd005;
+        emu.decode_and_execute_opcode();
+        //then
+        assert_eq!(txt_to_byte("### "), booleans_to_byte(&emu.gfx, 0, 0));
+        assert_eq!(txt_to_byte("#  #"), booleans_to_byte(&emu.gfx, 0, 1));
+        assert_eq!(txt_to_byte("### "), booleans_to_byte(&emu.gfx, 0, 2));
+        assert_eq!(txt_to_byte("#  #"), booleans_to_byte(&emu.gfx, 0, 3));
+        assert_eq!(txt_to_byte("### "), booleans_to_byte(&emu.gfx, 0, 4));
+        assert_eq!(true, emu.draw);
+        assert_eq!(0x00, emu.v[0x0f]);
+        assert_eq!(0x0000+2, emu.pc);
+    }
+    
+    #[test]
+    fn test_opcode_dxyn_draw_font_C() {
+        let mut emu = Emu::new();
+        //given
+        let fchar = 0xC; 
+        emu.ram_idx = 0x0000 + (fchar as u16) * 5; 
+        emu.pc = 0x0000;
+        //when
+        emu.opcode = 0xd005;
+        emu.decode_and_execute_opcode();
+        //then
+        assert_eq!(txt_to_byte("####"), booleans_to_byte(&emu.gfx, 0, 0));
+        assert_eq!(txt_to_byte("#   "), booleans_to_byte(&emu.gfx, 0, 1));
+        assert_eq!(txt_to_byte("#   "), booleans_to_byte(&emu.gfx, 0, 2));
+        assert_eq!(txt_to_byte("#   "), booleans_to_byte(&emu.gfx, 0, 3));
+        assert_eq!(txt_to_byte("####"), booleans_to_byte(&emu.gfx, 0, 4));
+        assert_eq!(true, emu.draw);
+        assert_eq!(0x00, emu.v[0x0f]);
+        assert_eq!(0x0000+2, emu.pc);
+    }
+
+    #[test]
+    fn test_opcode_dxyn_draw_font_D() {
+        let mut emu = Emu::new();
+        //given
+        let fchar = 0xD; 
+        emu.ram_idx = 0x0000 + (fchar as u16) * 5; 
+        emu.pc = 0x0000;
+        //when
+        emu.opcode = 0xd005;
+        emu.decode_and_execute_opcode();
+        //then
+        assert_eq!(txt_to_byte("### "), booleans_to_byte(&emu.gfx, 0, 0));
+        assert_eq!(txt_to_byte("#  #"), booleans_to_byte(&emu.gfx, 0, 1));
+        assert_eq!(txt_to_byte("#  #"), booleans_to_byte(&emu.gfx, 0, 2));
+        assert_eq!(txt_to_byte("#  #"), booleans_to_byte(&emu.gfx, 0, 3));
+        assert_eq!(txt_to_byte("### "), booleans_to_byte(&emu.gfx, 0, 4));
+        assert_eq!(true, emu.draw);
+        assert_eq!(0x00, emu.v[0x0f]);
+        assert_eq!(0x0000+2, emu.pc);
+    }
+
+    #[test]
+    fn test_opcode_dxyn_draw_font_E() {
+        let mut emu = Emu::new();
+        //given
+        let fchar = 0xE; 
+        emu.ram_idx = 0x0000 + (fchar as u16) * 5; 
+        emu.pc = 0x0000;
+        //when
+        emu.opcode = 0xd005;
+        emu.decode_and_execute_opcode();
+        //then
+        assert_eq!(txt_to_byte("####"), booleans_to_byte(&emu.gfx, 0, 0));
+        assert_eq!(txt_to_byte("#   "), booleans_to_byte(&emu.gfx, 0, 1));
+        assert_eq!(txt_to_byte("####"), booleans_to_byte(&emu.gfx, 0, 2));
+        assert_eq!(txt_to_byte("#   "), booleans_to_byte(&emu.gfx, 0, 3));
+        assert_eq!(txt_to_byte("####"), booleans_to_byte(&emu.gfx, 0, 4));
+        assert_eq!(true, emu.draw);
+        assert_eq!(0x00, emu.v[0x0f]);
+        assert_eq!(0x0000+2, emu.pc);
+    }
+    
+    #[test]
+    fn test_opcode_dxyn_draw_font_F() {
+        let mut emu = Emu::new();
+        //given
+        let fchar = 0xF; 
+        emu.ram_idx = 0x0000 + (fchar as u16) * 5; 
+        emu.pc = 0x0000;
+        //when
+        emu.opcode = 0xd005;
+        emu.decode_and_execute_opcode();
+        //then
+        assert_eq!(txt_to_byte("####"), booleans_to_byte(&emu.gfx, 0, 0));
+        assert_eq!(txt_to_byte("#   "), booleans_to_byte(&emu.gfx, 0, 1));
+        assert_eq!(txt_to_byte("####"), booleans_to_byte(&emu.gfx, 0, 2));
+        assert_eq!(txt_to_byte("#   "), booleans_to_byte(&emu.gfx, 0, 3));
+        assert_eq!(txt_to_byte("#   "), booleans_to_byte(&emu.gfx, 0, 4));
+        assert_eq!(true, emu.draw);
+        assert_eq!(0x00, emu.v[0x0f]);
+        assert_eq!(0x0000+2, emu.pc);
+    }
+
     fn txt_to_byte(txt: &str) -> u8 {
         let mut bits: u8 = 0b000000000;
         for (i,c) in txt.chars().enumerate() {
