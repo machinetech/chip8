@@ -9,6 +9,7 @@ const NUM_REGISTERS: usize = 16;
 const PROGRAM_START: usize = 512; 
 const RAM_SIZE: usize = 4096;
 const STACK_SIZE: usize = 16;
+const NUM_SUPER_MODE_FLAGS: usize = 8;
 
 const FONT_MAP: [u8; 5 * 16] = [
     0xf0, 0x90, 0x90, 0x90, 0xf0, // 0
@@ -29,7 +30,7 @@ const FONT_MAP: [u8; 5 * 16] = [
     0xf0, 0x80, 0xf0, 0x80, 0x80, // F
 ];
 
-const BIG_FONT_MAP: [u8; 10 * 16] = [
+const SUPER_MODE_FONT_MAP: [u8; 10 * 16] = [
     0xff, 0xff, 0xc3, 0xc3, 0xc3, 0xc3, 0xc3, 0xc3, 0xff, 0xff, // 0
     0x18, 0x78, 0x78, 0x18, 0x18, 0x18, 0x18, 0x18, 0xff, 0xff, // 1
     0xff, 0xff, 0x03, 0x03, 0xff, 0xff, 0xc0, 0xc0, 0xff, 0xff, // 2
@@ -59,28 +60,28 @@ pub struct Emu {
     // each 2 bytes long. 
     opcode: u16,
     // There are 4,096 8-bit memory locations making for a total of 4KB RAM. 
-    // +---------------+= 0xfff=4095 
-    // |               |
-    // |               |
-    // |               |
-    // | Program +     | 
-    // | Data          | 
-    // |               |
-    // |               |
-    // |               |
-    // |               |
-    // +---------------+= 0x200=0512 
-    // |               | 
-    // |               | 
-    // +---------------+= 0x0f0=0240 
-    // |               | 
-    // | BIG_FONT_MAP  |
-    // |               | 
-    // +---------------+= 0x050=0080 
-    // |               | 
-    // | FONT_MAP      |
-    // |               | 
-    // +---------------+= 0x000=0000 
+    // +---------------------+= 0xfff=4095 
+    // |                     |
+    // |                     |
+    // |                     |
+    // | Program +           | 
+    // | Data                | 
+    // |                     |
+    // |                     |
+    // |                     |
+    // |                     |
+    // +---------------------+= 0x200=0512 
+    // |                     | 
+    // |                     | 
+    // +---------------------+= 0x0f0=0240 
+    // |                     | 
+    // | SUPER_MODE_FONT_MAP |
+    // |                     | 
+    // +---------------------+= 0x050=0080 
+    // |                     | 
+    // | FONT_MAP            |
+    // |                     | 
+    // +---------------------+= 0x000=0000 
     //
     ram: [u8; RAM_SIZE],  
     // There are 16 8-bit registers, referred to as v0 to vf: v0 to vE are
@@ -109,6 +110,8 @@ pub struct Emu {
     sp: usize,
     // We cache a copy of the rom to allow for convenient reset.
     rom: Vec<u8>,
+    // Super mode flags used by opcodes fx75 and fx85.
+    super_mode_flags: [u8; NUM_SUPER_MODE_FLAGS]
 }
 
 impl Default for Emu {
@@ -117,7 +120,7 @@ impl Default for Emu {
         let mut emu = Emu {
             opcode: 0,
             ram: [0; RAM_SIZE],  
-            v: [0; NUM_REGISTERS],            
+            v: [0; NUM_REGISTERS],
             ram_idx: 0,                
             pc: PROGRAM_START as u16,                
             gfx: [[false; GFX_H]; GFX_W],
@@ -127,15 +130,16 @@ impl Default for Emu {
             sp: 0, 
             keys: [false; 16],
             draw: false,
-            rom: Vec::with_capacity(MAX_ROM_SIZE)
+            rom: Vec::with_capacity(MAX_ROM_SIZE),
+            super_mode_flags: [0; NUM_SUPER_MODE_FLAGS],
         };
         let mut i = 0;
         for j in 0..FONT_MAP.len() {
             emu.ram[i] = FONT_MAP[j];
             i += 1;
         }
-        for k in 0..BIG_FONT_MAP.len() {
-            emu.ram[i] = BIG_FONT_MAP[k];
+        for k in 0..SUPER_MODE_FONT_MAP.len() {
+            emu.ram[i] = SUPER_MODE_FONT_MAP[k];
             i += 1;
         }
         emu 
