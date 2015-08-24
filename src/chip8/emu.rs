@@ -71,6 +71,13 @@ pub struct Emu {
     // |               |
     // +---------------+= 0x200=0512 
     // |               | 
+    // |               | 
+    // +---------------+= 0x0f0=0240 
+    // |               | 
+    // | BIG_FONT_MAP  |
+    // |               | 
+    // +---------------+= 0x050=0080 
+    // |               | 
     // | FONT_MAP      |
     // |               | 
     // +---------------+= 0x000=0000 
@@ -122,8 +129,14 @@ impl Default for Emu {
             draw: false,
             rom: Vec::with_capacity(MAX_ROM_SIZE)
         };
-        for i in 0..FONT_MAP.len() {
-            emu.ram[i] = FONT_MAP[i];
+        let mut i = 0;
+        for j in 0..FONT_MAP.len() {
+            emu.ram[i] = FONT_MAP[j];
+            i += 1;
+        }
+        for k in 0..BIG_FONT_MAP.len() {
+            emu.ram[i] = BIG_FONT_MAP[k];
+            i += 1;
         }
         emu 
     }
