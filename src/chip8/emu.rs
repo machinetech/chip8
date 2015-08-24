@@ -1306,23 +1306,83 @@ mod tests {
     }
 
     #[test]
-    fn test_opcode_dxyn_underflow_width() {
-        // todo
-    }
-    
-    #[test]
     fn test_opcode_dxyn_overflow_width() {
-        // todo
+        let mut emu = Emu::new();
+        //given
+        emu.pc = 0x0000; 
+        emu.draw = false;
+        emu.v[1] = (GFX_W - 4) as u8;
+        emu.v[2] = 0x0006 ;
+        emu.ram_idx = 0x222;
+        emu.ram[(emu.ram_idx+0) as usize] = 0b01010101 as u8;
+        emu.ram[(emu.ram_idx+1) as usize] = 0b11111111 as u8;
+
+        //when
+        emu.opcode = 0xd122;
+        emu.decode_and_execute_opcode();
+
+        //then
+        assert_eq!(false, emu.gfx[GFX_W-4+0][0x0006+0]);
+        assert_eq!(true,  emu.gfx[GFX_W-4+1][0x0006+0]);
+        assert_eq!(false, emu.gfx[GFX_W-4+2][0x0006+0]);
+        assert_eq!(true,  emu.gfx[GFX_W-4+3][0x0006+0]);
+        assert_eq!(false, emu.gfx[0][0x0006+0]);
+        assert_eq!(true,  emu.gfx[1][0x0006+0]);
+        assert_eq!(false, emu.gfx[2][0x0006+0]);
+        assert_eq!(true,  emu.gfx[3][0x0006+0]);
+
+        assert_eq!(true, emu.gfx[GFX_W-4+0][0x0006+1]);
+        assert_eq!(true, emu.gfx[GFX_W-4+1][0x0006+1]);
+        assert_eq!(true, emu.gfx[GFX_W-4+2][0x0006+1]);
+        assert_eq!(true, emu.gfx[GFX_W-4+3][0x0006+1]);
+        assert_eq!(true, emu.gfx[0][0x0006+1]);
+        assert_eq!(true, emu.gfx[1][0x0006+1]);
+        assert_eq!(true, emu.gfx[2][0x0006+1]);
+        assert_eq!(true, emu.gfx[3][0x0006+1]);
+        
+        assert_eq!(true, emu.draw);
+        assert_eq!(0x00, emu.v[0x0f]);
+        assert_eq!(0x0000+2, emu.pc);
     }
 
     #[test]
-    fn test_opcode_dxyn_underflow_height() {
-        // todo
-    }
-    
-    #[test]
     fn test_opcode_dxyn_overflow_height() {
-        // todo
+        let mut emu = Emu::new();
+        //given
+        emu.pc = 0x0000; 
+        emu.draw = false;
+        emu.v[1] = 0x0005;
+        emu.v[2] = (GFX_H - 1) as u8;
+        emu.ram_idx = 0x222;
+        emu.ram[(emu.ram_idx+0) as usize] = 0b01010101 as u8;
+        emu.ram[(emu.ram_idx+1) as usize] = 0b11111111 as u8;
+
+        //when
+        emu.opcode = 0xd122;
+        emu.decode_and_execute_opcode();
+
+        //then
+        assert_eq!(false, emu.gfx[0x0005+0][GFX_H-1]);
+        assert_eq!(true,  emu.gfx[0x0005+1][GFX_H-1]);
+        assert_eq!(false, emu.gfx[0x0005+2][GFX_H-1]);
+        assert_eq!(true,  emu.gfx[0x0005+3][GFX_H-1]);
+        assert_eq!(false, emu.gfx[0x0005+4][GFX_H-1]);
+        assert_eq!(true,  emu.gfx[0x0005+5][GFX_H-1]);
+        assert_eq!(false, emu.gfx[0x0005+6][GFX_H-1]);
+        assert_eq!(true,  emu.gfx[0x0005+7][GFX_H-1]);
+
+        assert_eq!(true,  emu.gfx[0x0005+0][0]);
+        assert_eq!(true,  emu.gfx[0x0005+1][0]);
+        assert_eq!(true,  emu.gfx[0x0005+2][0]);
+        assert_eq!(true,  emu.gfx[0x0005+3][0]);
+        assert_eq!(true,  emu.gfx[0x0005+4][0]);
+        assert_eq!(true,  emu.gfx[0x0005+5][0]);
+        assert_eq!(true,  emu.gfx[0x0005+6][0]);
+        assert_eq!(true,  emu.gfx[0x0005+7][0]);
+        
+        assert_eq!(true, emu.draw);
+        assert_eq!(0x00, emu.v[0x0f]);
+        assert_eq!(0x0000+2, emu.pc);
     }
     
     #[test]
