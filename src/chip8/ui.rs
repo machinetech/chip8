@@ -8,7 +8,7 @@ use sdl2::keyboard::Scancode;
 use sdl2::Sdl;
 use super::{GFX_H,GFX_W,wav};
 
-const SCALE: usize = 16;
+const SCALE: usize = 8;
 
 pub struct BeepCallback;
 

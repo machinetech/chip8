@@ -4,6 +4,9 @@ use super::{GFX_H,GFX_W};
 use std::default::Default;
 use std::mem;
 
+const SMALL_GFX_W: usize = 64;
+const SMALL_GFX_H: usize = 32;
+
 const MAX_ROM_SIZE: usize = RAM_SIZE - PROGRAM_START;
 const NUM_REGISTERS: usize = 16;
 const PROGRAM_START: usize = 512; 
@@ -425,8 +428,8 @@ impl Emu {
         for y_offset in 0..sprt_h as usize {
             let sprt_row = self.ram[(self.ram_idx as usize) + y_offset];
             for x_offset in 0..8 {
-                let gfx_x = (gfx_start_x as usize + x_offset) % GFX_W;
-                let gfx_y = (gfx_start_y as usize + y_offset) % GFX_H;
+                let gfx_x = (gfx_start_x as usize + x_offset) % SMALL_GFX_W;
+                let gfx_y = (gfx_start_y as usize + y_offset) % SMALL_GFX_H;
                 let mask = 0b10000000 >> x_offset; 
                 let sprt_pix = sprt_row & mask != 0;
                 let gfx_pix = &mut self.gfx[gfx_x][gfx_y];
@@ -624,6 +627,7 @@ impl Emu {
 mod tests {
 
     use super::Emu;
+    use super::{SMALL_GFX_H,SMALL_GFX_W};
     use super::super::{GFX_H,GFX_W};
     
     #[test]
@@ -1347,7 +1351,7 @@ mod tests {
         //given
         emu.pc = 0x0000; 
         emu.draw = false;
-        emu.v[1] = (GFX_W - 4) as u8;
+        emu.v[1] = (SMALL_GFX_W - 4) as u8;
         emu.v[2] = 0x0006 ;
         emu.ram_idx = 0x222;
         emu.ram[(emu.ram_idx+0) as usize] = 0b01010101 as u8;
@@ -1358,19 +1362,19 @@ mod tests {
         emu.decode_and_execute_opcode();
 
         //then
-        assert_eq!(false, emu.gfx[GFX_W-4+0][0x0006+0]);
-        assert_eq!(true,  emu.gfx[GFX_W-4+1][0x0006+0]);
-        assert_eq!(false, emu.gfx[GFX_W-4+2][0x0006+0]);
-        assert_eq!(true,  emu.gfx[GFX_W-4+3][0x0006+0]);
+        assert_eq!(false, emu.gfx[SMALL_GFX_W-4+0][0x0006+0]);
+        assert_eq!(true,  emu.gfx[SMALL_GFX_W-4+1][0x0006+0]);
+        assert_eq!(false, emu.gfx[SMALL_GFX_W-4+2][0x0006+0]);
+        assert_eq!(true,  emu.gfx[SMALL_GFX_W-4+3][0x0006+0]);
         assert_eq!(false, emu.gfx[0][0x0006+0]);
         assert_eq!(true,  emu.gfx[1][0x0006+0]);
         assert_eq!(false, emu.gfx[2][0x0006+0]);
         assert_eq!(true,  emu.gfx[3][0x0006+0]);
 
-        assert_eq!(true, emu.gfx[GFX_W-4+0][0x0006+1]);
-        assert_eq!(true, emu.gfx[GFX_W-4+1][0x0006+1]);
-        assert_eq!(true, emu.gfx[GFX_W-4+2][0x0006+1]);
-        assert_eq!(true, emu.gfx[GFX_W-4+3][0x0006+1]);
+        assert_eq!(true, emu.gfx[SMALL_GFX_W-4+0][0x0006+1]);
+        assert_eq!(true, emu.gfx[SMALL_GFX_W-4+1][0x0006+1]);
+        assert_eq!(true, emu.gfx[SMALL_GFX_W-4+2][0x0006+1]);
+        assert_eq!(true, emu.gfx[SMALL_GFX_W-4+3][0x0006+1]);
         assert_eq!(true, emu.gfx[0][0x0006+1]);
         assert_eq!(true, emu.gfx[1][0x0006+1]);
         assert_eq!(true, emu.gfx[2][0x0006+1]);
@@ -1398,14 +1402,14 @@ mod tests {
         emu.decode_and_execute_opcode();
 
         //then
-        assert_eq!(false, emu.gfx[0x0005+0][GFX_H-1]);
-        assert_eq!(true,  emu.gfx[0x0005+1][GFX_H-1]);
-        assert_eq!(false, emu.gfx[0x0005+2][GFX_H-1]);
-        assert_eq!(true,  emu.gfx[0x0005+3][GFX_H-1]);
-        assert_eq!(false, emu.gfx[0x0005+4][GFX_H-1]);
-        assert_eq!(true,  emu.gfx[0x0005+5][GFX_H-1]);
-        assert_eq!(false, emu.gfx[0x0005+6][GFX_H-1]);
-        assert_eq!(true,  emu.gfx[0x0005+7][GFX_H-1]);
+        assert_eq!(false, emu.gfx[0x0005+0][SMALL_GFX_H-1]);
+        assert_eq!(true,  emu.gfx[0x0005+1][SMALL_GFX_H-1]);
+        assert_eq!(false, emu.gfx[0x0005+2][SMALL_GFX_H-1]);
+        assert_eq!(true,  emu.gfx[0x0005+3][SMALL_GFX_H-1]);
+        assert_eq!(false, emu.gfx[0x0005+4][SMALL_GFX_H-1]);
+        assert_eq!(true,  emu.gfx[0x0005+5][SMALL_GFX_H-1]);
+        assert_eq!(false, emu.gfx[0x0005+6][SMALL_GFX_H-1]);
+        assert_eq!(true,  emu.gfx[0x0005+7][SMALL_GFX_H-1]);
 
         assert_eq!(true,  emu.gfx[0x0005+0][0]);
         assert_eq!(true,  emu.gfx[0x0005+1][0]);
@@ -1765,7 +1769,8 @@ mod tests {
         bits
     }
 
-    fn booleans_to_byte(gfx: &[[bool; GFX_H]; GFX_W], x: usize, y: usize) -> u8 {
+    fn booleans_to_byte(gfx: &[[bool; GFX_H]; GFX_W], 
+                        x: usize, y: usize) -> u8 {
         let mut bits: u8 = 0b00000000;
         for i in 0..8 {
             bits |= if gfx[x+i][y] {0b10000000} else {0b00000000} >> i; 
