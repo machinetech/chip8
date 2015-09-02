@@ -6,7 +6,7 @@ use sdl2::rect::Rect;
 use sdl2::render::Renderer;
 use sdl2::keyboard::Scancode;
 use sdl2::Sdl;
-use super::{GFX_H,GFX_W,wav};
+use super::{GFX_H,GFX_W,Mode,wav};
 
 const SCALE: usize = 8;
 
@@ -71,17 +71,21 @@ impl Ui {
         }
     }
 
-    pub fn refresh_gfx(&mut self, gfx: &[[bool; GFX_H]; GFX_W]) {
+    pub fn refresh_gfx(&mut self, mode: Mode, gfx: &[[bool; GFX_H]; GFX_W]) {
         let bg = RGB(0x1c, 0x28, 0x41);
         let fg = RGB(0xff, 0xff, 0xff);
+        let scale_factor = match (mode) { 
+            Mode::CHIP8 => SCALE * 2, 
+            Mode::SCHIP8 => SCALE 
+        };
         for x in 0..GFX_W {
             for y in 0..GFX_H {
                 let pix_on = gfx[x][y];
                 let color = if pix_on {fg} else {bg};
-                let rx = (x * SCALE) as i32;
-                let ry = (y * SCALE) as i32;
-                let rw = SCALE as u32;
-                let rh = SCALE as u32;
+                let rx = (x * scale_factor) as i32;
+                let ry = (y * scale_factor) as i32;
+                let rw = scale_factor as u32;
+                let rh = scale_factor as u32;
                 let rect = Rect::new(rx, ry, rw, rh).unwrap().unwrap();
                 self.renderer.set_draw_color(color);
                 self.renderer.fill_rect(rect);

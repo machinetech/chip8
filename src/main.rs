@@ -3,7 +3,7 @@ mod chip8;
 extern crate sdl2;
 extern crate time;
 
-use chip8::{GFX_H,GFX_W};
+use chip8::{GFX_H,GFX_W,Mode};
 use chip8::emu::Emu;
 use chip8::ui::Ui;
 use chip8::metro::Metronome;
@@ -28,7 +28,7 @@ fn load_rom(emu: &mut Emu, path_to_rom: &Path) {
 enum UiToEmuMsg { Keys([bool; 16]), Paused(bool), Quit, Reset }
 
 // Messages that get passed from the emulator to the ui.
-enum EmuToUiMsg { Beeping(bool), Draw([[bool; GFX_H]; GFX_W]), QuitAck }
+enum EmuToUiMsg { Beeping(bool), Draw(Mode, [[bool; GFX_H]; GFX_W]), QuitAck }
 
 // Drives user interaction. Responsible for processing keypresses, updating
 // the screen and playing audible beeps. Communicates with the emulator by
@@ -104,9 +104,9 @@ fn process_emu_events(ui: &mut Ui, rx: &Receiver<EmuToUiMsg>, paused: &bool,
                 // Handle beeb state change signalled by emulator.
                 EmuToUiMsg::Beeping(on) => ui.beep(on),
                 // Handle draw event signalled by emulator.
-                EmuToUiMsg::Draw(ref gfx) => {
+                EmuToUiMsg::Draw(ref mode, ref gfx) => {
                     refresh_gfx_rate.on_tick(|| {
-                        if !*paused { ui.refresh_gfx(gfx); }
+                        if !*paused { ui.refresh_gfx(*mode, gfx); }
                     });
                 },
                 // Emulator has acknowledged the earlier quit signal.
@@ -170,7 +170,7 @@ fn signal_draw_event(emu: &mut Emu, tx: &Sender<EmuToUiMsg>, paused: &bool,
         if !paused {
             &mut emu.execute_cycle();
             if emu.draw {
-                tx.send(EmuToUiMsg::Draw(emu.gfx)).unwrap();
+                tx.send(EmuToUiMsg::Draw(emu.mode, emu.gfx)).unwrap();
                 emu.draw = false;
             }
          } 

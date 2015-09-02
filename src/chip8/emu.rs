@@ -1,6 +1,6 @@
 extern crate rand;
 
-use super::{GFX_H,GFX_W};
+use super::{GFX_H,GFX_W,Mode};
 use std::default::Default;
 use std::mem;
 
@@ -53,6 +53,8 @@ const SUPER_MODE_FONT_MAP: [u8; 10 * 16] = [
 ];
 
 pub struct Emu {
+    // Can run in one of two modes: CHIP8 or SCHIP8.
+    pub mode: Mode,
     // Graphics pixel is either set or not. 
     pub gfx: [[bool; GFX_H]; GFX_W], 
     // Maps state of keypresses. True means the key has been pressed.
@@ -121,6 +123,7 @@ impl Default for Emu {
     
     fn default() -> Self {
         let mut emu = Emu {
+            mode: Mode::CHIP8,
             opcode: 0,
             ram: [0; RAM_SIZE],  
             v: [0; NUM_REGISTERS],
