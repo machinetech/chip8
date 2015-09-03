@@ -53,7 +53,7 @@ const SUPER_MODE_FONT_MAP: [u8; 10 * 16] = [
 ];
 
 pub struct Emu {
-    // Can run in one of two modes: CHIP8 or SCHIP8.
+    // Can run in one of two modes: STANDARD or SUPER.
     pub mode: Mode,
     // Graphics pixel is either set or not. 
     pub gfx: [[bool; GFX_H]; GFX_W], 
@@ -123,7 +123,7 @@ impl Default for Emu {
     
     fn default() -> Self {
         let mut emu = Emu {
-            mode: Mode::CHIP8,
+            mode: Mode::STANDARD,
             opcode: 0,
             ram: [0; RAM_SIZE],  
             v: [0; NUM_REGISTERS],

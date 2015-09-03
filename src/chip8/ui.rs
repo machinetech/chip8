@@ -76,7 +76,7 @@ impl Ui {
         let fg = RGB(0xff, 0xff, 0xff);
         let projection_factor = match (mode) { 
             //
-            // For plain CHIP8 mode, the 64x32 gfx subscreen will be projected 
+            // For STANDARD mode, the 64x32 gfx subscreen will be projected 
             // to fit the entire viewable area. The excess between 64x32 and
             // 128x64 will be projected offscreen. 
             // +-----------------------+-----------------------+
@@ -88,8 +88,8 @@ impl Ui {
             // |                                               |
             // |                                               |
             // +-----------------------------------------------+ (128x64)
-            Mode::CHIP8 => SCALE * 2, 
-            Mode::SCHIP8 => SCALE 
+            Mode::STANDARD => SCALE * 2, 
+            Mode::SUPER => SCALE 
         };
         for x in 0..GFX_W {
             for y in 0..GFX_H {

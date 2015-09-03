@@ -1,6 +1,6 @@
 
 #[derive(Copy,Clone)]
-pub enum Mode { CHIP8, SCHIP8 }
+pub enum Mode { STANDARD, SUPER }
 
 pub const GFX_W: usize = 128;
 pub const GFX_H: usize = 64;
