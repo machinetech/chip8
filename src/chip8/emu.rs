@@ -201,6 +201,18 @@ impl Emu {
         self.pc += 2; 
     } 
 
+    // Disable SUPER mode. 
+    fn execute_opcode_00fe(&mut self) {
+        self.mode = Mode::STANDARD;
+        self.pc += 2; 
+    } 
+    
+    // Enable SUPER mode. 
+    fn execute_opcode_00ff(&mut self) {
+        self.mode = Mode::SUPER;
+        self.pc += 2; 
+    } 
+    
     // Jump to address nnn.
     fn execute_opcode_1nnn(&mut self) {
         let nnn = self.opcode & 0x0fff; 
@@ -512,11 +524,20 @@ impl Emu {
     }
 
     // Set ram_idx to the location of the sprite for the character in vx. 
-    // Characters 0-f are represented by a 4x5 font.
+    // Characters 0-F are represented by a 4x5 font.
     fn execute_opcode_fx29(&mut self) {
-        let x = (self.opcode & 0x0f02) >> 8;
+        let x = (self.opcode & 0x0f00) >> 8;
         let fchar = self.v[x as usize];
         self.ram_idx = 0x0000 + (fchar as u16) * 5; 
+        self.pc += 2;
+    } 
+
+    // Set ram_idx to the location of the sprite for the character in vx. 
+    // Characters 0-F are represented by a 8x10 font.
+    fn execute_opcode_fx30(&mut self) {
+        let x = (self.opcode & 0x0f00) >> 8;
+        let fchar = self.v[x as usize];
+        self.ram_idx = 0x0000 + (fchar as u16) * 10; 
         self.pc += 2;
     } 
 
@@ -527,7 +548,7 @@ impl Emu {
     // the hundreds digit in memory at location in ram_idx, the tens digits 
     // at location ram_idx+1, and the ones digit at location ram_idx+2.
     fn execute_opcode_fx33(&mut self) {
-        let x = (self.opcode & 0x0f02) >> 8;
+        let x = (self.opcode & 0x0f00) >> 8;
         let mut vx = self.v[x as usize];
         let ones = vx % 10;
         vx /= 10;
@@ -542,7 +563,7 @@ impl Emu {
 
     // Store v0 to vx in memory starting at address ram_idx.
     fn execute_opcode_fx55(&mut self) {
-        let x = (self.opcode & 0x0f02) >> 8;
+        let x = (self.opcode & 0x0f00) >> 8;
         for i in 0..(x as u16) + 1 {
             self.ram[(self.ram_idx+i) as usize] = self.v[i as usize];
         }
@@ -551,7 +572,7 @@ impl Emu {
 
     // Fill v0 to vx with values from memory starting at address ram_idx.
     fn execute_opcode_fx65(&mut self) {
-        let x = (self.opcode & 0x0f02) >> 8;
+        let x = (self.opcode & 0x0f00) >> 8;
         for i in 0..(x as u16) + 1 {
             self.v[i as usize] = self.ram[(self.ram_idx+i) as usize];
         }
@@ -570,6 +591,8 @@ impl Emu {
             0x0000 => match self.opcode & 0x00ff {
                 0x00e0 => self.execute_opcode_00e0(),
                 0x00ee => self.execute_opcode_00ee(),
+                0x00fe => self.execute_opcode_00fe(),
+                0x00ff => self.execute_opcode_00ff(),
                 _ => self.unknown_opcode()
             }, 
             0x1000 => self.execute_opcode_1nnn(), 
@@ -611,6 +634,7 @@ impl Emu {
                0x0018 => self.execute_opcode_fx18(),
                0x001e => self.execute_opcode_fx1e(),
                0x0029 => self.execute_opcode_fx29(),
+               0x0030 => self.execute_opcode_fx30(),
                0x0033 => self.execute_opcode_fx33(),
                0x0055 => self.execute_opcode_fx55(),
                0x0065 => self.execute_opcode_fx65(),
@@ -630,9 +654,9 @@ impl Emu {
 mod tests {
 
     use super::Emu;
-    use super::{SMALL_GFX_H,SMALL_GFX_W};
-    use super::super::{GFX_H,GFX_W};
-    
+    use super::{SMALL_GFX_H, SMALL_GFX_W};
+    use super::super::{Mode, GFX_H, GFX_W};
+
     #[test]
     pub fn test_opcode_00e0() {
         let mut emu = Emu::new();
@@ -662,6 +686,34 @@ mod tests {
         emu.decode_and_execute_opcode();
         //then
         assert_eq!(0x00, emu.sp);
+        assert_eq!(0x0aaa+2, emu.pc);
+    }
+
+    #[test]
+    pub fn test_opcode_00fe() {
+        let mut emu = Emu::new();
+        //given
+        emu.pc = 0x0aaa; 
+        emu.mode = Mode::SUPER;
+        //when
+        emu.opcode = 0x00fe;
+        emu.decode_and_execute_opcode();
+        //then
+        assert_eq!(Mode::STANDARD, emu.mode);
+        assert_eq!(0x0aaa+2, emu.pc);
+    }
+
+    #[test]
+    pub fn test_opcode_00ff() {
+        let mut emu = Emu::new();
+        //given
+        emu.pc = 0x0aaa; 
+        emu.mode = Mode::STANDARD;
+        //when
+        emu.opcode = 0x00ff;
+        emu.decode_and_execute_opcode();
+        //then
+        assert_eq!(Mode::SUPER, emu.mode);
         assert_eq!(0x0aaa+2, emu.pc);
     }
 
@@ -1957,6 +2009,22 @@ mod tests {
         emu.decode_and_execute_opcode();
         //then
         assert_eq!(0x0000+(0x0a*5), emu.ram_idx);
+        assert_eq!(0x0a, emu.v[0x03]);
+        assert_eq!(0x0000+2, emu.pc);
+    }
+
+    #[test]
+    fn test_opcode_fx30() {
+        let mut emu = Emu::new();
+        //given
+        emu.pc = 0x0000;
+        emu.ram_idx = 0xfff;
+        emu.v[0x03] = 0x0a;
+        //when
+        emu.opcode = 0xf330;
+        emu.decode_and_execute_opcode();
+        //then
+        assert_eq!(0x0000+(0x0a*10), emu.ram_idx);
         assert_eq!(0x0a, emu.v[0x03]);
         assert_eq!(0x0000+2, emu.pc);
     }

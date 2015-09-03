@@ -1,5 +1,5 @@
 
-#[derive(Copy,Clone)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Mode { STANDARD, SUPER }
 
 pub const GFX_W: usize = 128;
