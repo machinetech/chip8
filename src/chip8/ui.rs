@@ -74,7 +74,20 @@ impl Ui {
     pub fn refresh_gfx(&mut self, mode: Mode, gfx: &[[bool; GFX_H]; GFX_W]) {
         let bg = RGB(0x1c, 0x28, 0x41);
         let fg = RGB(0xff, 0xff, 0xff);
-        let scale_factor = match (mode) { 
+        let projection_factor = match (mode) { 
+            //
+            // For plain CHIP8 mode, the 64x32 gfx subscreen will be projected 
+            // to fit the entire viewable area. The excess between 64x32 and
+            // 128x64 will be projected offscreen. 
+            // +-----------------------+-----------------------+
+            // |                       |                       |
+            // |         64x32         |                       |
+            // |                       |                       |
+            // +-----------------------+    drawn offscreen    |
+            // |                                               |
+            // |                                               |
+            // |                                               |
+            // +-----------------------------------------------+ (128x64)
             Mode::CHIP8 => SCALE * 2, 
             Mode::SCHIP8 => SCALE 
         };
@@ -82,10 +95,10 @@ impl Ui {
             for y in 0..GFX_H {
                 let pix_on = gfx[x][y];
                 let color = if pix_on {fg} else {bg};
-                let rx = (x * scale_factor) as i32;
-                let ry = (y * scale_factor) as i32;
-                let rw = scale_factor as u32;
-                let rh = scale_factor as u32;
+                let rx = (x * projection_factor) as i32;
+                let ry = (y * projection_factor) as i32;
+                let rw = projection_factor as u32;
+                let rh = projection_factor as u32;
                 let rect = Rect::new(rx, ry, rw, rh).unwrap().unwrap();
                 self.renderer.set_draw_color(color);
                 self.renderer.fill_rect(rect);
