@@ -455,22 +455,22 @@ impl Emu {
         let gfx_start_x = self.v[(self.opcode as usize & 0x0f00) >> 8] as usize;
         let gfx_start_y = self.v[(self.opcode as usize & 0x00f0) >> 4] as usize;
         let n = (self.opcode & 0x000f) as usize; 
-        let sprt_w: usize = if n == 0 && self.mode == Mode::SUPER {16} else {8};
+        let sprt_w = if n == 0 && self.mode == Mode::SUPER {16} else {8};
         let sprt_h = if n == 0 && self.mode == Mode::SUPER {16} else {n};
         let sprt_bytes_per_row = sprt_w / 8; 
         self.v[0x0f] = 0x00;
         for y_offset in 0..sprt_h {
             for sprt_byte_row_idx in 0..sprt_bytes_per_row {
                 let sprt_byte_ram_idx_base = self.ram_idx as usize;
-                let sprt_byte_ram_idx_offset: usize = y_offset * sprt_bytes_per_row + 
+                let sprt_byte_ram_idx_offset = y_offset * sprt_bytes_per_row + 
                     sprt_byte_row_idx; 
-                let sprt_byte_ram_idx: usize = sprt_byte_ram_idx_base + 
+                let sprt_byte_ram_idx = sprt_byte_ram_idx_base + 
                     sprt_byte_ram_idx_offset;
                 let sprt_byte: u8 = self.ram[sprt_byte_ram_idx]; 
                 for sprt_byte_bit_idx in 0..8 as usize {
-                    let x_offset: usize = sprt_byte_row_idx * 8 + sprt_byte_bit_idx;
-                    let gfx_x: usize = (gfx_start_x + x_offset) % self.width();
-                    let gfx_y: usize = (gfx_start_y + y_offset) % self.height(); 
+                    let x_offset = sprt_byte_row_idx * 8 + sprt_byte_bit_idx;
+                    let gfx_x = (gfx_start_x + x_offset) % self.width();
+                    let gfx_y = (gfx_start_y + y_offset) % self.height(); 
                     let mask = 0b1000_0000 >> sprt_byte_bit_idx; 
                     let sprt_pix = sprt_byte & mask != 0;
                     let gfx_pix = &mut self.gfx[gfx_x][gfx_y];
