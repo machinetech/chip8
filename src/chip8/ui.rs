@@ -74,7 +74,7 @@ impl Ui {
     pub fn refresh_gfx(&mut self, mode: Mode, gfx: &[[bool; GFX_H]; GFX_W]) {
         let bg = RGB(0x1c, 0x28, 0x41);
         let fg = RGB(0xff, 0xff, 0xff);
-        let projection_factor = match (mode) { 
+        let projection_factor = match mode { 
             //
             // For STANDARD mode, the 64x32 gfx subscreen will be projected 
             // to fit the entire viewable area. The excess between 64x32 and

@@ -452,67 +452,39 @@ impl Emu {
     // any set pixels are changed to unset, and 0 otherwise. If n is 0 and
     // in SUPER mode, then show 16x16 sprite instead.
     fn execute_opcode_dxyn(&mut self) {
-        let n = self.opcode & 0x000f; 
-        match (n, self.mode) {
-            (0, Mode::SUPER)  => self.execute_opcode_dxyn_16x16(),
-            _ => self.execute_opcode_dxyn_8xn()
-        }
-    }
-
-    // Draw 16x16 sprite from ram[ram_idx] at gfx[vx][vy]. Set vf to 1 if
-    // any set pixels are changed to unset, and 0 otherwise.
-    fn execute_opcode_dxyn_16x16(&mut self) {
-        let gfx_start_x = self.v[(self.opcode as usize & 0x0f00) >> 8];
-        let gfx_start_y = self.v[(self.opcode as usize & 0x00f0) >> 4];
-        let sprt_h = 16; 
+        let gfx_start_x = self.v[(self.opcode as usize & 0x0f00) >> 8] as usize;
+        let gfx_start_y = self.v[(self.opcode as usize & 0x00f0) >> 4] as usize;
+        let n = (self.opcode & 0x000f) as usize; 
+        let sprt_w: usize = if n == 0 && self.mode == Mode::SUPER {16} else {8};
+        let sprt_h = if n == 0 && self.mode == Mode::SUPER {16} else {n};
+        let sprt_bytes_per_row = sprt_w / 8; 
         self.v[0x0f] = 0x00;
-        for y_offset in 0..sprt_h as usize {
-            let sprt_row = self.ram[(self.ram_idx as usize) + y_offset];
-            for x_offset in 0..8 {
-                let gfx_x = (gfx_start_x as usize + x_offset) % self.width();
-                let gfx_y = (gfx_start_y as usize + y_offset) % self.height(); 
-                let mask = 0b10000000 >> x_offset; 
-                let sprt_pix = sprt_row & mask != 0;
-                let gfx_pix = &mut self.gfx[gfx_x][gfx_y];
-                let gfx_pix_after = *gfx_pix ^ sprt_pix;
-                if *gfx_pix != gfx_pix_after {
-                   *gfx_pix = gfx_pix_after;
-                   if gfx_pix_after {
-                      self.draw = true; 
-                   } else {
-                      self.v[0x0f] = 0x01;
-                   }
-                } 
-            }
-        }
-        self.pc += 2; 
-    }
-   
-    // Draw 8xn sprite from ram[ram_idx] at gfx[vx][vy]. Set vf to 1 if
-    // any set pixels are changed to unset, and 0 otherwise.
-    fn execute_opcode_dxyn_8xn(&mut self) {
-        let gfx_start_x = self.v[(self.opcode as usize & 0x0f00) >> 8];
-        let gfx_start_y = self.v[(self.opcode as usize & 0x00f0) >> 4];
-        let sprt_h = self.opcode & 0x000f; 
-        self.v[0x0f] = 0x00;
-        for y_offset in 0..sprt_h as usize {
-            let sprt_row = self.ram[(self.ram_idx as usize) + y_offset];
-            for x_offset in 0..8 {
-                let gfx_x = (gfx_start_x as usize + x_offset) % self.width();
-                let gfx_y = (gfx_start_y as usize + y_offset) % self.height(); 
-                let mask = 0b10000000 >> x_offset; 
-                let sprt_pix = sprt_row & mask != 0;
-                let gfx_pix = &mut self.gfx[gfx_x][gfx_y];
-                let gfx_pix_after = *gfx_pix ^ sprt_pix;
-                if *gfx_pix != gfx_pix_after {
-                   *gfx_pix = gfx_pix_after;
-                   if gfx_pix_after {
-                      self.draw = true; 
-                   } else {
-                      self.v[0x0f] = 0x01;
-                   }
-                } 
-            }
+        for y_offset in 0..sprt_h {
+            for sprt_byte_row_idx in 0..sprt_bytes_per_row {
+                let sprt_byte_ram_idx_base = self.ram_idx as usize;
+                let sprt_byte_ram_idx_offset: usize = y_offset * sprt_bytes_per_row + 
+                    sprt_byte_row_idx; 
+                let sprt_byte_ram_idx: usize = sprt_byte_ram_idx_base + 
+                    sprt_byte_ram_idx_offset;
+                let sprt_byte: u8 = self.ram[sprt_byte_ram_idx]; 
+                for sprt_byte_bit_idx in 0..8 as usize {
+                    let x_offset: usize = sprt_byte_row_idx * 8 + sprt_byte_bit_idx;
+                    let gfx_x: usize = (gfx_start_x + x_offset) % self.width();
+                    let gfx_y: usize = (gfx_start_y + y_offset) % self.height(); 
+                    let mask = 0b1000_0000 >> sprt_byte_bit_idx; 
+                    let sprt_pix = sprt_byte & mask != 0;
+                    let gfx_pix = &mut self.gfx[gfx_x][gfx_y];
+                    let gfx_pix_after = *gfx_pix ^ sprt_pix;
+                    if *gfx_pix != gfx_pix_after {
+                       *gfx_pix = gfx_pix_after;
+                       if gfx_pix_after {
+                          self.draw = true; 
+                       } else {
+                          self.v[0x0f] = 0x01;
+                       }
+                    } 
+                }
+            } 
         }
         self.pc += 2; 
     }
@@ -587,8 +559,9 @@ impl Emu {
         self.pc += 2;
     } 
 
-    // Set ram_idx to the location of the sprite for the character in vx. 
-    // Characters 0-F are represented by a 8x10 font.
+    // Set ram_idx to the location of the sprite for the character in vx, where
+    // x must be in the range 0 to 9 (inclusive). Characters 0-F are 
+    // represented by a 8x10 font.
     fn execute_opcode_fx30(&mut self) {
         let x = (self.opcode & 0x0f00) >> 8;
         let fchar = self.v[x as usize];
