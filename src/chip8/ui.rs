@@ -89,7 +89,7 @@ impl Ui {
             // |                                               |
             // +-----------------------------------------------+ (128x64)
             Mode::STANDARD => SCALE * 2, 
-            Mode::SUPER => SCALE 
+            Mode::SUPER => SCALE, 
         };
         for x in 0..GFX_W {
             for y in 0..GFX_H {

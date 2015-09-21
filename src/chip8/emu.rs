@@ -203,6 +203,19 @@ impl Emu {
         }
     }
     
+    // Scroll screen n lines down.
+    fn execute_opcode_00cn(&mut self) {
+        let n = (self.opcode & 0x000f) as usize; 
+        for y in (n..GFX_H).rev() {
+            for x in 0..GFX_W { self.gfx[x][y] = self.gfx[x][y-n]; }
+        } 
+        for y in 0..n {
+            for x in 0..GFX_W { self.gfx[x][y] = false; }
+        } 
+        self.draw = true;
+        self.pc += 2; 
+    }  
+    
     // Clear screen.
     fn execute_opcode_00e0(&mut self) {
         for x in 0..GFX_W { for y in 0..GFX_H { self.gfx[x][y] = false; } }
@@ -210,6 +223,7 @@ impl Emu {
         self.pc += 2; 
     }  
 
+    
     // Return from last subroutine.
     fn execute_opcode_00ee(&mut self) {
         self.sp -= 1; 
@@ -456,23 +470,24 @@ impl Emu {
         let gfx_start_y = self.v[(self.opcode as usize & 0x00f0) >> 4] as usize;
         let n = (self.opcode & 0x000f) as usize; 
         let sprt_w = if n == 0 && self.mode == Mode::SUPER {16} else {8};
-        let sprt_h = if n == 0 && self.mode == Mode::SUPER {16} else {n};
+        let sprt_h = if n == 0 {16} else {n};
         let sprt_bytes_per_row = sprt_w / 8; 
         self.v[0x0f] = 0x00;
         for y_offset in 0..sprt_h {
-            for sprt_byte_row_idx in 0..sprt_bytes_per_row {
+            for sprt_byte_col_idx in 0..sprt_bytes_per_row {
                 let sprt_byte_ram_idx_base = self.ram_idx as usize;
                 let sprt_byte_ram_idx_offset = y_offset * sprt_bytes_per_row + 
-                    sprt_byte_row_idx; 
+                    sprt_byte_col_idx; 
                 let sprt_byte_ram_idx = sprt_byte_ram_idx_base + 
                     sprt_byte_ram_idx_offset;
                 let sprt_byte: u8 = self.ram[sprt_byte_ram_idx]; 
                 for sprt_byte_bit_idx in 0..8 as usize {
-                    let x_offset = sprt_byte_row_idx * 8 + sprt_byte_bit_idx;
+                    let x_offset = sprt_byte_col_idx * 8 + sprt_byte_bit_idx;
                     let gfx_x = (gfx_start_x + x_offset) % self.width();
                     let gfx_y = (gfx_start_y + y_offset) % self.height(); 
-                    let mask = 0b1000_0000 >> sprt_byte_bit_idx; 
+                    let mask = 0b_1000_0000 >> sprt_byte_bit_idx; 
                     let sprt_pix = sprt_byte & mask != 0;
+                    if sprt_pix == false { continue; }
                     let gfx_pix = &mut self.gfx[gfx_x][gfx_y];
                     let gfx_pix_after = *gfx_pix ^ sprt_pix;
                     if *gfx_pix != gfx_pix_after {
@@ -607,6 +622,24 @@ impl Emu {
         self.pc += 2;
     }
 
+    // Store v0 to vx in super_mode_flags user flags.
+    fn execute_opcode_fx75(&mut self) {
+        let x = (self.opcode & 0x0f00) >> 8;
+        for i in 0..(x as u16) + 1 {
+            self.super_mode_flags[i as usize] = self.v[i as usize];
+        }
+        self.pc += 2;
+    }
+
+    // Fill v0 to vx with values from super_mode_flags.
+    fn execute_opcode_fx85(&mut self) {
+        let x = (self.opcode & 0x0f00) >> 8;
+        for i in 0..(x as u16) + 1 {
+            self.v[i as usize] = self.super_mode_flags[i as usize];
+        }
+        self.pc += 2;
+    }
+    
     // Fetch the opcode to which the program counter is pointing.
     fn fetch_opcode(&mut self) {
         let hbyte = self.ram[self.pc as usize];
@@ -616,12 +649,16 @@ impl Emu {
                 
     fn decode_and_execute_opcode(&mut self) {
         match self.opcode & 0xf000 {
-            0x0000 => match self.opcode & 0x00ff {
-                0x00e0 => self.execute_opcode_00e0(),
-                0x00ee => self.execute_opcode_00ee(),
-                0x00fe => self.execute_opcode_00fe(),
-                0x00ff => self.execute_opcode_00ff(),
-                _ => self.unknown_opcode()
+            0x0000 => 
+                match self.opcode & 0x00f0 {
+                    0x00c0 => self.execute_opcode_00cn(),
+                    _ =>  match self.opcode & 0x00ff {
+                        0x00e0 => self.execute_opcode_00e0(),
+                        0x00ee => self.execute_opcode_00ee(),
+                        0x00fe => self.execute_opcode_00fe(),
+                        0x00ff => self.execute_opcode_00ff(),
+                        _ => self.unknown_opcode()
+                }, 
             }, 
             0x1000 => self.execute_opcode_1nnn(), 
             0x2000 => self.execute_opcode_2nnn(), 
@@ -666,6 +703,8 @@ impl Emu {
                0x0033 => self.execute_opcode_fx33(),
                0x0055 => self.execute_opcode_fx55(),
                0x0065 => self.execute_opcode_fx65(),
+               0x0075 => self.execute_opcode_fx75(),
+               0x0085 => self.execute_opcode_fx85(),
                _ => self.unknown_opcode()
             },
             _ => self.unknown_opcode()
