@@ -12,7 +12,7 @@ const NUM_REGISTERS: usize = 16;
 const PROGRAM_START: usize = 512; 
 const RAM_SIZE: usize = 4096;
 const STACK_SIZE: usize = 16;
-const NUM_SUPER_MODE_FLAGS: usize = 8;
+const NUM_SUPER_MODE_RPL_FLAGS: usize = 8;
 
 const FONT_MAP: [u8; 5 * 16] = [
     0xf0, 0x90, 0x90, 0x90, 0xf0, // 0
@@ -116,7 +116,7 @@ pub struct Emu {
     // We cache a copy of the rom to allow for convenient reset.
     rom: Vec<u8>,
     // Super mode flags used by opcodes fx75 and fx85.
-    super_mode_flags: [u8; NUM_SUPER_MODE_FLAGS]
+    super_mode_rpl_flags: [u8; NUM_SUPER_MODE_RPL_FLAGS]
 }
 
 impl Default for Emu {
@@ -137,7 +137,7 @@ impl Default for Emu {
             keys: [false; 16],
             draw: false,
             rom: Vec::with_capacity(MAX_ROM_SIZE),
-            super_mode_flags: [0; NUM_SUPER_MODE_FLAGS],
+            super_mode_rpl_flags: [0; NUM_SUPER_MODE_RPL_FLAGS],
         };
         let mut i = 0;
         for j in 0..FONT_MAP.len() {
@@ -234,7 +234,7 @@ impl Emu {
     // Scroll screen 4 pixels right.
     fn execute_opcode_00fb(&mut self) {
         for y in 0..GFX_H {
-            for x in (0..GFX_W).rev() { self.gfx[x][y] = self.gfx[x-4][y] }
+            for x in (4..GFX_W).rev() { self.gfx[x][y] = self.gfx[x-4][y] }
             for x in 0..4 { self.gfx[x][y] = false; }
         }
         self.pc += 2; 
@@ -351,7 +351,7 @@ impl Emu {
         let vx = self.v[x as usize]; 
         let vy = self.v[y as usize]; 
         self.v[x as usize] = vx.wrapping_add(vy); 
-        let carried = self.v[x as usize] < vy;
+        let carried = (vx as u16 + vy as u16) > 0xff;
         self.v[0x0f] = if carried {1} else {0}; 
         self.pc += 2; 
     }
@@ -644,20 +644,20 @@ impl Emu {
         self.pc += 2;
     }
 
-    // Store v0 to vx in super_mode_flags user flags.
+    // Store v0 to vx in super_mode_rpl_flags user flags.
     fn execute_opcode_fx75(&mut self) {
         let x = (self.opcode & 0x0f00) >> 8;
         for i in 0..(x as u16) + 1 {
-            self.super_mode_flags[i as usize] = self.v[i as usize];
+            self.super_mode_rpl_flags[i as usize] = self.v[i as usize];
         }
         self.pc += 2;
     }
 
-    // Fill v0 to vx with values from super_mode_flags.
+    // Fill v0 to vx with values from super_mode_rpl_flags.
     fn execute_opcode_fx85(&mut self) {
         let x = (self.opcode & 0x0f00) >> 8;
         for i in 0..(x as u16) + 1 {
-            self.v[i as usize] = self.super_mode_flags[i as usize];
+            self.v[i as usize] = self.super_mode_rpl_flags[i as usize];
         }
         self.pc += 2;
     }
