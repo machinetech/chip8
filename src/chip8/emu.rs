@@ -231,6 +231,24 @@ impl Emu {
         self.pc += 2; 
     } 
 
+    // Scroll screen 4 pixels right.
+    fn execute_opcode_00fb(&mut self) {
+        for y in 0..GFX_H {
+            for x in (0..GFX_W).rev() { self.gfx[x][y] = self.gfx[x-4][y] }
+            for x in 0..4 { self.gfx[x][y] = false; }
+        }
+        self.pc += 2; 
+    }
+
+    // Scroll screen 4 pixels left. 
+    fn execute_opcode_00fc(&mut self) {
+        for y in 0..GFX_H {
+            for x in 0..(GFX_W - 4) { self.gfx[x][y] = self.gfx[x+4][y] }
+            for x in (GFX_W-4)..GFX_W { self.gfx[x][y] = false; }
+        }
+        self.pc += 2; 
+    }
+
     // Disable SUPER mode. 
     fn execute_opcode_00fe(&mut self) {
         self.mode = Mode::STANDARD;
@@ -483,11 +501,15 @@ impl Emu {
                 let sprt_byte: u8 = self.ram[sprt_byte_ram_idx]; 
                 for sprt_byte_bit_idx in 0..8 as usize {
                     let x_offset = sprt_byte_col_idx * 8 + sprt_byte_bit_idx;
+                    // Drawing beyond max width and height will wrap.
                     let gfx_x = (gfx_start_x + x_offset) % self.width();
                     let gfx_y = (gfx_start_y + y_offset) % self.height(); 
+                    // Mask to obtain single bit from byte. 
                     let mask = 0b_1000_0000 >> sprt_byte_bit_idx; 
                     let sprt_pix = sprt_byte & mask != 0;
-                    if sprt_pix == false { continue; }
+                    // The early continue is an optimization only and safe to
+                    // remove.
+                    if sprt_pix == false { continue; } 
                     let gfx_pix = &mut self.gfx[gfx_x][gfx_y];
                     let gfx_pix_after = *gfx_pix ^ sprt_pix;
                     if *gfx_pix != gfx_pix_after {
@@ -655,6 +677,8 @@ impl Emu {
                     _ =>  match self.opcode & 0x00ff {
                         0x00e0 => self.execute_opcode_00e0(),
                         0x00ee => self.execute_opcode_00ee(),
+                        0x00fb => self.execute_opcode_00fb(),
+                        0x00fc => self.execute_opcode_00fc(),
                         0x00fe => self.execute_opcode_00fe(),
                         0x00ff => self.execute_opcode_00ff(),
                         _ => self.unknown_opcode()
