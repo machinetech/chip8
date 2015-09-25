@@ -1,5 +1,5 @@
 # CHIP-8 [![Build Status](https://travis-ci.org/wm9/chip8.svg)](https://travis-ci.org/wm9/chip8)
-A [CHIP-8](http://en.wikipedia.org/wiki/CHIP-8) emulator written in the [Rust](http://www.rust-lang.org/) programming language. A few sample game screenshots below. The project uses the [MIT](https://github.com/wm9/chip8/blob/master/LICENSE) license. 
+A [CHIP-8](http://en.wikipedia.org/wiki/CHIP-8) and Super CHIP-8 (SCHIP) emulator written in the [Rust](http://www.rust-lang.org/) programming language. A few sample game screenshots below. The project uses the [MIT](https://github.com/wm9/chip8/blob/master/LICENSE) license.
 
 Brix
 --- 
@@ -21,6 +21,30 @@ Pong
 Tetris
 ---
 ![tetris.png](http://wm9.github.io/chip8/images/tetris.png "Tetris")
+
+Blinky
+---
+![blinky.png](http://wm9.github.io/chip8/images/blinky.png "Blinky")
+
+H.Piper
+---
+![hpiper.png](http://wm9.github.io/chip8/images/hpiper.png "HPiper")
+
+Car
+---
+![car.png](http://wm9.github.io/chip8/images/car.png "Car")
+
+Super Trip
+---
+![super_trip.png](http://wm9.github.io/chip8/images/super_trip.png "Super Trip")
+
+Super Worm
+---
+![super_worm.png](http://wm9.github.io/chip8/images/super_worm.png "Super Worm")
+
+Ant
+---
+![ant.png](http://wm9.github.io/chip8/images/ant.png "Ant")
 
 ## Requirements
 
