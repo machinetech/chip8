@@ -113,10 +113,10 @@ pub struct Emu {
     // stack[sp-1] <-- top of the stack (where last entry pushed resides)
     // a 'pseudo register' not directly accessible from programs.
     sp: usize,
-    // We cache a copy of the rom to allow for convenient reset.
-    rom: Vec<u8>,
     // Super mode flags used by opcodes fx75 and fx85.
-    super_mode_rpl_flags: [u8; NUM_SUPER_MODE_RPL_FLAGS]
+    super_mode_rpl_flags: [u8; NUM_SUPER_MODE_RPL_FLAGS],
+    // We cache a copy of the rom to allow for convenient reset.
+    rom: Vec<u8>
 }
 
 impl Default for Emu {
@@ -249,6 +249,11 @@ impl Emu {
         self.pc += 2; 
     }
 
+    // Meant to exit, but we will reset instead.
+    fn execute_opcode_00fd(&mut self) {
+        self.reset();
+    } 
+    
     // Disable SUPER mode. 
     fn execute_opcode_00fe(&mut self) {
         self.mode = Mode::STANDARD;
@@ -515,9 +520,9 @@ impl Emu {
                     if *gfx_pix != gfx_pix_after {
                        *gfx_pix = gfx_pix_after;
                        if gfx_pix_after {
-                          self.draw = true; 
+                           self.draw = true; 
                        } else {
-                          self.v[0x0f] = 0x01;
+                           self.v[0x0f] = 0x01;
                        }
                     } 
                 }
@@ -577,7 +582,7 @@ impl Emu {
     }
 
     // Add vx to ram_idx. Set vf to 1 if there was a range overflow,
-    // ram_idx + vx > 0xfff, 0 otherwise.
+    // ram_idx + vx > 0x0fff, 0 otherwise.
     fn execute_opcode_fx1e(&mut self) {
         let x = (self.opcode & 0x0f00) >> 8;
         let sum  = self.ram_idx + self.v[x as usize] as u16;
@@ -679,6 +684,7 @@ impl Emu {
                         0x00ee => self.execute_opcode_00ee(),
                         0x00fb => self.execute_opcode_00fb(),
                         0x00fc => self.execute_opcode_00fc(),
+                        0x00fd => self.execute_opcode_00fd(),
                         0x00fe => self.execute_opcode_00fe(),
                         0x00ff => self.execute_opcode_00ff(),
                         _ => self.unknown_opcode()
