@@ -136,8 +136,8 @@ impl Default for Emu {
             sp: 0, 
             keys: [false; 16],
             draw: false,
-            rom: Vec::with_capacity(MAX_ROM_SIZE),
             super_mode_rpl_flags: [0; NUM_SUPER_MODE_RPL_FLAGS],
+            rom: Vec::with_capacity(MAX_ROM_SIZE),
         };
         let mut i = 0;
         for j in 0..FONT_MAP.len() {
@@ -498,11 +498,8 @@ impl Emu {
         self.v[0x0f] = 0x00;
         for y_offset in 0..sprt_h {
             for sprt_byte_col_idx in 0..sprt_bytes_per_row {
-                let sprt_byte_ram_idx_base = self.ram_idx as usize;
-                let sprt_byte_ram_idx_offset = y_offset * sprt_bytes_per_row + 
-                    sprt_byte_col_idx; 
-                let sprt_byte_ram_idx = sprt_byte_ram_idx_base + 
-                    sprt_byte_ram_idx_offset;
+                let sprt_byte_ram_idx = self.ram_idx as usize + 
+                    y_offset * sprt_bytes_per_row;
                 let sprt_byte: u8 = self.ram[sprt_byte_ram_idx]; 
                 for sprt_byte_bit_idx in 0..8 as usize {
                     let x_offset = sprt_byte_col_idx * 8 + sprt_byte_bit_idx;
@@ -512,18 +509,16 @@ impl Emu {
                     // Mask to obtain single bit from byte. 
                     let mask = 0b_1000_0000 >> sprt_byte_bit_idx; 
                     let sprt_pix = sprt_byte & mask != 0;
-                    // The early continue is an optimization only and safe to
-                    // remove.
-                    if sprt_pix == false { continue; } 
                     let gfx_pix = &mut self.gfx[gfx_x][gfx_y];
                     let gfx_pix_after = *gfx_pix ^ sprt_pix;
-                    if *gfx_pix != gfx_pix_after {
+                    if gfx_pix_after != *gfx_pix {
+                        if gfx_pix_after {
+                            // Reduce flicker and draw only when pix switched on. 
+                            self.draw = true;
+                        } else {
+                            self.v[0x0f] = 0x01;
+                        } 
                        *gfx_pix = gfx_pix_after;
-                       if gfx_pix_after {
-                           self.draw = true; 
-                       } else {
-                           self.v[0x0f] = 0x01;
-                       }
                     } 
                 }
             } 
