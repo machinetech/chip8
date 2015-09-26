@@ -22,10 +22,6 @@ Tetris
 ---
 ![tetris.png](http://wm9.github.io/chip8/images/tetris.png "Tetris")
 
-Blinky
----
-![blinky.png](http://wm9.github.io/chip8/images/blinky.png "Blinky")
-
 H.Piper
 ---
 ![hpiper.png](http://wm9.github.io/chip8/images/hpiper.png "HPiper")
