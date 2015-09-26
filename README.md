@@ -111,6 +111,8 @@ If anything should go wrong, please report the issue [here](https://github.com/w
 ## References
 * [Cowgod's Chip-8 Technical Reference](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM)   
 * [MASTERING CHIP-8 by Matthew Mikolay](http://mattmik.com/chip8.html)
+* [SUPER-CHIP v1.1 specifications by Erik Bryntse] (http://devernay.free.fr/hacks/chip8/schip.txt)
+* [CHIP8.DOC by David Winter] (http://devernay.free.fr/hacks/chip8/CHIP8.DOC)
 
 
 
