@@ -237,6 +237,7 @@ impl Emu {
             for x in (4..GFX_W).rev() { self.gfx[x][y] = self.gfx[x-4][y] }
             for x in 0..4 { self.gfx[x][y] = false; }
         }
+        self.draw = true;
         self.pc += 2; 
     }
 
@@ -246,6 +247,7 @@ impl Emu {
             for x in 0..(GFX_W - 4) { self.gfx[x][y] = self.gfx[x+4][y] }
             for x in (GFX_W-4)..GFX_W { self.gfx[x][y] = false; }
         }
+        self.draw = true;
         self.pc += 2; 
     }
 
@@ -507,7 +509,7 @@ impl Emu {
                     let gfx_x = (gfx_start_x + x_offset) % self.width();
                     let gfx_y = (gfx_start_y + y_offset) % self.height(); 
                     // Mask to obtain single bit from byte. 
-                    let mask = 0b_1000_0000 >> sprt_byte_bit_idx; 
+                    let mask = 0b_1000_0000_u8 >> sprt_byte_bit_idx; 
                     let sprt_pix = sprt_byte & mask != 0;
                     let gfx_pix = &mut self.gfx[gfx_x][gfx_y];
                     let gfx_pix_after = *gfx_pix ^ sprt_pix;
@@ -750,6 +752,25 @@ mod tests {
     use super::super::{Mode, GFX_H, GFX_W};
 
     #[test]
+    pub fn test_opcode_00cn() {
+        let mut emu = Emu::new();
+        //given
+        emu.pc = 0x0000; 
+        emu.gfx[0][0] = true;
+        emu.gfx[1][0] = true;
+        //when
+        emu.opcode = 0x00c2;
+        emu.decode_and_execute_opcode();
+        //then
+        assert_eq!(false, emu.gfx[0][0]);
+        assert_eq!(false, emu.gfx[1][0]);
+        assert_eq!(true, emu.gfx[0][2]);
+        assert_eq!(true, emu.gfx[1][2]);
+        assert_eq!(true, emu.draw);
+        assert_eq!(0x0000+2, emu.pc);
+    }
+
+    #[test]
     pub fn test_opcode_00e0() {
         let mut emu = Emu::new();
         //given
@@ -761,6 +782,44 @@ mod tests {
         emu.decode_and_execute_opcode();
         //then
         for x in 0..GFX_W { for y in 0..GFX_H { assert_eq!(false, emu.gfx[x][y]); } }
+        assert_eq!(true, emu.draw);
+        assert_eq!(0x0000+2, emu.pc);
+    }
+
+    #[test]
+    pub fn test_opcode_00fb() {
+        let mut emu = Emu::new();
+        //given
+        emu.pc = 0x0000; 
+        emu.gfx[0][0] = true;
+        emu.gfx[1][0] = true;
+        //when
+        emu.opcode = 0x00fb;
+        emu.decode_and_execute_opcode();
+        //then
+        assert_eq!(false, emu.gfx[0][0]);
+        assert_eq!(false, emu.gfx[1][0]);
+        assert_eq!(true, emu.gfx[4][0]);
+        assert_eq!(true, emu.gfx[5][0]);
+        assert_eq!(true, emu.draw);
+        assert_eq!(0x0000+2, emu.pc);
+    }
+
+    #[test]
+    pub fn test_opcode_00fc() {
+        let mut emu = Emu::new();
+        //given
+        emu.pc = 0x0000; 
+        emu.gfx[4][0] = true;
+        emu.gfx[5][0] = true;
+        //when
+        emu.opcode = 0x00fc;
+        emu.decode_and_execute_opcode();
+        //then
+        assert_eq!(false, emu.gfx[4][0]);
+        assert_eq!(false, emu.gfx[5][0]);
+        assert_eq!(true, emu.gfx[0][0]);
+        assert_eq!(true, emu.gfx[1][0]);
         assert_eq!(true, emu.draw);
         assert_eq!(0x0000+2, emu.pc);
     }
