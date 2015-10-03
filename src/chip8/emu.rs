@@ -233,7 +233,7 @@ impl Emu {
     
     // Return from last subroutine.
     fn execute_opcode_00ee(&mut self) {
-        self.sp -= 1; 
+        self.sp = (self.sp - 1) & (STACK_SIZE - 1); 
         self.pc = self.stack[self.sp] as u16; 
         self.pc = (self.pc + 2) & 0x0fff; 
     } 
@@ -285,7 +285,7 @@ impl Emu {
     fn execute_opcode_2nnn(&mut self) {
         let nnn = self.opcode & 0x0fff;
         self.stack[self.sp] = self.pc as u16; 
-        self.sp += 1; 
+        self.sp = (self.sp + 1) & (STACK_SIZE - 1); 
         self.pc = nnn;
     }
 
