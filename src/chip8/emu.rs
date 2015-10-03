@@ -2,6 +2,7 @@ extern crate rand;
 
 use super::{GFX_H,GFX_W,Mode};
 use std::default::Default;
+use std::cmp;
 use std::mem;
 
 const SMALL_GFX_W: usize = 64;
@@ -154,10 +155,12 @@ impl Default for Emu {
 
 impl Emu {
 
+    // Create emulator.
     pub fn new() -> Self { 
         Default::default() 
     }
     
+    // Load rom into emulator, but does not start execution. 
     pub fn load_rom(&mut self, rom: Vec<u8>) {
         if rom.len() > MAX_ROM_SIZE {
             panic!("Program too large to fit into memory");
@@ -168,21 +171,26 @@ impl Emu {
         }  
     }
 
+    // Reset the program to the initial rom state.
     pub fn reset(&mut self) {
         let stale = mem::replace(self, Emu::new());
         self.load_rom(stale.rom);
     }
 
+    // Perform a single fetch-decode-execute cycle.
     pub fn execute_cycle(&mut self) {
         self.fetch_opcode();
         self.decode_and_execute_opcode();
     }
 
+    // Update the delay and sound timers.
     pub fn update_timers(&mut self) {
         if self.dt > 0 { self.dt -= 1; }
         if self.st > 0 { self.st -= 1; }
     }
 
+    // Indicates whether the state justifies a beep at this
+    // exact time.
     pub fn beeping(&self) -> bool {
         return self.st > 0;
     }
@@ -553,7 +561,7 @@ impl Emu {
     // This implementation will only advance the program counter
     // if a keypress is found. In other words, this opcode will
     // execute over and over until a keypress is found. This allows
-    // opporunity for a keypress to arrive in between executions.
+    // opportunity for a keypress to arrive in between executions.
     fn execute_opcode_fx0a(&mut self) {
         let x = (self.opcode & 0x0f00) >> 8; 
         for i in 0..self.keys.len() {
@@ -646,19 +654,19 @@ impl Emu {
         self.pc += 2;
     }
 
-    // Store v0 to vx in super_mode_rpl_flags user flags.
+    // Store v0 to vx in super_mode_rpl_flags user flags (x <= 7).
     fn execute_opcode_fx75(&mut self) {
         let x = (self.opcode & 0x0f00) >> 8;
-        for i in 0..(x as u16) + 1 {
+        for i in 0..(cmp::min(x,7) as u16) + 1 {
             self.super_mode_rpl_flags[i as usize] = self.v[i as usize];
         }
         self.pc += 2;
     }
 
-    // Fill v0 to vx with values from super_mode_rpl_flags.
+    // Fill v0 to vx with values from super_mode_rpl_flags (x <= 7).
     fn execute_opcode_fx85(&mut self) {
         let x = (self.opcode & 0x0f00) >> 8;
-        for i in 0..(x as u16) + 1 {
+        for i in 0..(cmp::min(x,7) as u16) + 1 {
             self.v[i as usize] = self.super_mode_rpl_flags[i as usize];
         }
         self.pc += 2;
@@ -2234,6 +2242,64 @@ mod tests {
         assert_eq!(0x0a, emu.v[0]);
         assert_eq!(0x0b, emu.v[1]);
         assert_eq!(0x0c, emu.v[2]);
+        assert_eq!(0x0000+2, emu.pc);
+    }
+
+    #[test]
+    fn test_opcode_fx75() {
+        let mut emu = Emu::new();
+        //given
+        emu.pc = 0x0000;
+        emu.v[0] = 0x03;
+        emu.v[1] = 0x04;
+        emu.v[2] = 0x05;
+        emu.v[3] = 0x06;
+        emu.v[4] = 0x07;
+        emu.v[5] = 0x08;
+        emu.v[6] = 0x09;
+        emu.v[7] = 0x0A;
+        emu.v[8] = 0x0B;
+        //when
+        emu.opcode = 0xf375;
+        emu.decode_and_execute_opcode();
+        //then
+        assert_eq!(0x03, emu.super_mode_rpl_flags[0]);
+        assert_eq!(0x04, emu.super_mode_rpl_flags[1]);
+        assert_eq!(0x05, emu.super_mode_rpl_flags[2]);
+        assert_eq!(0x06, emu.super_mode_rpl_flags[3]);
+        assert_eq!(0x00, emu.super_mode_rpl_flags[4]);
+        assert_eq!(0x00, emu.super_mode_rpl_flags[5]);
+        assert_eq!(0x00, emu.super_mode_rpl_flags[6]);
+        assert_eq!(0x00, emu.super_mode_rpl_flags[7]);
+        assert_eq!(0x0000+2, emu.pc);
+    }
+
+    #[test]
+    fn test_opcode_fx75_safe_against_x_greater_than_7() {
+        let mut emu = Emu::new();
+        //given
+        emu.pc = 0x0000;
+        emu.v[0] = 0x03;
+        emu.v[1] = 0x04;
+        emu.v[2] = 0x05;
+        emu.v[3] = 0x06;
+        emu.v[4] = 0x07;
+        emu.v[5] = 0x08;
+        emu.v[6] = 0x09;
+        emu.v[7] = 0x0A;
+        emu.v[8] = 0x0B;
+        //when
+        emu.opcode = 0xf875;
+        emu.decode_and_execute_opcode();
+        //then
+        assert_eq!(0x03, emu.super_mode_rpl_flags[0]);
+        assert_eq!(0x04, emu.super_mode_rpl_flags[1]);
+        assert_eq!(0x05, emu.super_mode_rpl_flags[2]);
+        assert_eq!(0x06, emu.super_mode_rpl_flags[3]);
+        assert_eq!(0x07, emu.super_mode_rpl_flags[4]);
+        assert_eq!(0x08, emu.super_mode_rpl_flags[5]);
+        assert_eq!(0x09, emu.super_mode_rpl_flags[6]);
+        assert_eq!(0x0A, emu.super_mode_rpl_flags[7]);
         assert_eq!(0x0000+2, emu.pc);
     }
 
