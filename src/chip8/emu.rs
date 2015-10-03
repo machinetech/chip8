@@ -210,7 +210,7 @@ impl Emu {
             Mode::SUPER => GFX_H
         }
     }
-    
+   
     // Scroll screen n lines down.
     fn execute_opcode_00cn(&mut self) {
         let n = (self.opcode & 0x000f) as usize; 
@@ -221,22 +221,21 @@ impl Emu {
             for x in 0..GFX_W { self.gfx[x][y] = false; }
         } 
         self.draw = true;
-        self.pc += 2; 
+        self.pc = (self.pc + 2) & 0x0fff; 
     }  
     
     // Clear screen.
     fn execute_opcode_00e0(&mut self) {
         for x in 0..GFX_W { for y in 0..GFX_H { self.gfx[x][y] = false; } }
         self.draw = true;
-        self.pc += 2; 
+        self.pc = (self.pc + 2) & 0x0fff; 
     }  
-
     
     // Return from last subroutine.
     fn execute_opcode_00ee(&mut self) {
         self.sp -= 1; 
         self.pc = self.stack[self.sp] as u16; 
-        self.pc += 2; 
+        self.pc = (self.pc + 2) & 0x0fff; 
     } 
 
     // Scroll screen 4 pixels right.
@@ -246,7 +245,7 @@ impl Emu {
             for x in 0..4 { self.gfx[x][y] = false; }
         }
         self.draw = true;
-        self.pc += 2; 
+        self.pc = (self.pc + 2) & 0x0fff; 
     }
 
     // Scroll screen 4 pixels left. 
@@ -256,7 +255,7 @@ impl Emu {
             for x in (GFX_W-4)..GFX_W { self.gfx[x][y] = false; }
         }
         self.draw = true;
-        self.pc += 2; 
+        self.pc = (self.pc + 2) & 0x0fff; 
     }
 
     // Meant to exit, but we will reset instead.
@@ -267,13 +266,13 @@ impl Emu {
     // Disable SUPER mode. 
     fn execute_opcode_00fe(&mut self) {
         self.mode = Mode::STANDARD;
-        self.pc += 2; 
+        self.pc = (self.pc + 2) & 0x0fff; 
     } 
     
     // Enable SUPER mode. 
     fn execute_opcode_00ff(&mut self) {
         self.mode = Mode::SUPER;
-        self.pc += 2; 
+        self.pc = (self.pc + 2) & 0x0fff; 
     } 
     
     // Jump to address nnn.
@@ -316,7 +315,7 @@ impl Emu {
         let x = (self.opcode & 0x0f00) >> 8; 
         let nn = self.opcode & 0x00ff; 
         self.v[x as usize] = nn as u8; 
-        self.pc += 2; 
+        self.pc = (self.pc + 2) & 0x0fff; 
     }
 
     // Add nn to vx.
@@ -324,7 +323,7 @@ impl Emu {
         let x = (self.opcode & 0x0f00) >> 8; 
         let nn = self.opcode & 0x00ff; 
         self.v[x as usize] = self.v[x as usize].wrapping_add(nn as u8);
-        self.pc += 2; 
+        self.pc = (self.pc + 2) & 0x0fff; 
     }
 
     // Set vx to the value of vy.
@@ -332,7 +331,7 @@ impl Emu {
         let x = (self.opcode & 0x0f00) >> 8; 
         let y = (self.opcode & 0x00f0) >> 4; 
         self.v[x as usize] = self.v[y as usize]; 
-        self.pc += 2; 
+        self.pc = (self.pc + 2) & 0x0fff; 
     }
 
     // Set vx to vx OR vy.
@@ -340,7 +339,7 @@ impl Emu {
         let x = (self.opcode & 0x0f00) >> 8; 
         let y = (self.opcode & 0x00f0) >> 4; 
         self.v[x as usize] |= self.v[y as usize]; 
-        self.pc += 2; 
+        self.pc = (self.pc + 2) & 0x0fff; 
     }
 
     // Set vx to vx AND vy.
@@ -348,7 +347,7 @@ impl Emu {
         let x = (self.opcode & 0x0f00) >> 8; 
         let y = (self.opcode & 0x00f0) >> 4; 
         self.v[x as usize] &= self.v[y as usize]; 
-        self.pc += 2; 
+        self.pc = (self.pc + 2) & 0x0fff; 
     }
 
     // Set vx to vx XOR vy.
@@ -356,7 +355,7 @@ impl Emu {
         let x = (self.opcode & 0x0f00) >> 8; 
         let y = (self.opcode & 0x00f0) >> 4; 
         self.v[x as usize] ^= self.v[y as usize]; 
-        self.pc += 2; 
+        self.pc = (self.pc + 2) & 0x0fff; 
     }
 
     // Add vy to vx and set vf to 1 if there was a carry, 0 otherwise. 
@@ -368,7 +367,7 @@ impl Emu {
         self.v[x as usize] = vx.wrapping_add(vy); 
         let carried = (vx as u16 + vy as u16) > 0xff;
         self.v[0x0f] = if carried {1} else {0}; 
-        self.pc += 2; 
+        self.pc = (self.pc + 2) & 0x0fff; 
     }
 
     // Subtract vy from vx. Set vf to 0 if there was a borrow, 1 otherwise.
@@ -380,7 +379,7 @@ impl Emu {
         self.v[x as usize] = vx.wrapping_sub(vy); 
         let borrowed = vy > vx;
         self.v[0x0f] = if borrowed {0} else {1}; 
-        self.pc += 2; 
+        self.pc = (self.pc + 2) & 0x0fff; 
     }
 
     // There is some difference in opinion on how this opcode should
@@ -398,7 +397,7 @@ impl Emu {
         let y = (self.opcode & 0x00f0) >> 4; 
         self.v[0x0f] = self.v[y as usize] & 0x01;
         self.v[x as usize] = self.v[y as usize] >> 1; 
-        self.pc += 2; 
+        self.pc = (self.pc + 2) & 0x0fff; 
     }
 
     // There is some difference in opinion on how this opcode should
@@ -416,8 +415,8 @@ impl Emu {
     fn execute_opcode_8xy6(&mut self) {
         let x = (self.opcode & 0x0f00) >> 8; 
         self.v[0x0f] = self.v[x as usize] & 0x01;
-        self.v[x as usize] = self.v[x as usize] >> 1;
-        self.pc += 2; 
+        self.v[x as usize] >>= 1;
+        self.pc = (self.pc + 2) & 0x0fff; 
     }
 
     // Set vx to vy minus vx. Set vf to 0 if there was a borrow, 1 otherwise.
@@ -429,7 +428,7 @@ impl Emu {
         self.v[x as usize] = vy.wrapping_sub(vx); 
         let borrowed = vx > vy; 
         self.v[0x0f] = if borrowed {0} else {1}; 
-        self.pc += 2; 
+        self.pc = (self.pc + 2) & 0x0fff; 
     }
 
     // There is some difference in opinion on how this opcode should
@@ -445,7 +444,7 @@ impl Emu {
         let y = (self.opcode & 0x00f0) >> 4; 
         self.v[0x0f] = self.v[y as usize] & 0x01;
         self.v[x as usize] = self.v[y as usize] << 1; 
-        self.pc += 2;
+        self.pc = (self.pc + 2) & 0x0fff; 
     }
 
     // There is some difference in opinion on how this opcode should
@@ -463,8 +462,8 @@ impl Emu {
     fn execute_opcode_8xye(&mut self) {
         let x = (self.opcode & 0x0f00) >> 8; 
         self.v[0x0f] = self.v[x as usize] & 0x01; 
-        self.v[x as usize] = self.v[x as usize] << 1; 
-        self.pc += 2; 
+        self.v[x as usize] <<= 1; 
+        self.pc = (self.pc + 2) & 0x0fff; 
     }
 
     // Skip the next instruction if vx does not equal vy.
@@ -472,19 +471,20 @@ impl Emu {
         let x = (self.opcode & 0x0f00) >> 8; 
         let y = (self.opcode & 0x00f0) >> 4; 
         self.pc += if self.v[x as usize] != self.v[y as usize] {4} else {2};
+        self.pc &= 0x0fff;
     }
 
     // Set ram_idx to the address nnn.
     fn execute_opcode_annn(&mut self) {
         let nnn = self.opcode & 0x0fff; 
         self.ram_idx = nnn; 
-        self.pc += 2; 
+        self.pc = (self.pc + 2) & 0x0fff; 
     } 
 
     // Jump to the address nnn plus v0.
     fn execute_opcode_bnnn(&mut self) {
         let nnn = self.opcode & 0x0fff; 
-        self.pc = nnn + (self.v[0] as u16); 
+        self.pc = (nnn + (self.v[0] as u16)) & 0x0fff; 
     } 
 
     // Set vx to a random number and nn.
@@ -492,7 +492,7 @@ impl Emu {
         let x = (self.opcode & 0x0f00) >> 8; 
         let nn = self.opcode & 0x00ff; 
         self.v[x as usize] = rand::random::<u8>() & (nn as u8); 
-        self.pc += 2; 
+        self.pc = (self.pc + 2) & 0x0fff; 
     }
 
     // Draw 8xn sprite from ram[ram_idx] at gfx[vx][vy]. Set vf to 1 if
@@ -519,42 +519,41 @@ impl Emu {
                     // Mask to obtain single bit from byte. 
                     let mask = 0b_1000_0000_u8 >> sprt_byte_bit_idx; 
                     let sprt_pix = sprt_byte & mask != 0;
-                    let gfx_pix = &mut self.gfx[gfx_x][gfx_y];
-                    let gfx_pix_after = *gfx_pix ^ sprt_pix;
-                    if gfx_pix_after != *gfx_pix {
-                        if gfx_pix_after {
+                    if sprt_pix == true {
+                        let gfx_pix = &mut self.gfx[gfx_x][gfx_y];
+                        *gfx_pix ^= true;
+                        if *gfx_pix == true {
                             // Reduce flicker and draw only when pix switched on. 
                             self.draw = true;
                         } else {
                             self.v[0x0f] = 0x01;
                         } 
-                       *gfx_pix = gfx_pix_after;
-                    } 
+                    }
                 }
             } 
         }
-        self.pc += 2; 
+        self.pc = (self.pc + 2) & 0x0fff; 
     }
     
     // Skip the next instruction if the key stored in vx is pressed.
     fn execute_opcode_ex9e(&mut self) {
         let x = (self.opcode & 0x0f00) >> 8; 
         let key_pressed = self.keys[self.v[x as usize] as usize];
-        self.pc += if key_pressed {4} else {2};
+        self.pc = (self.pc + if key_pressed {4} else {2}) & 0x0fff;
     }
 
     // Skips the next instruction if the key stored in vx is not pressed.
     fn execute_opcode_exa1(&mut self) {
         let x = (self.opcode & 0x0f00) >> 8; 
         let key_pressed = self.keys[self.v[x as usize] as usize];
-        self.pc += if !key_pressed {4} else {2};
+        self.pc = (self.pc + if !key_pressed {4} else {2}) & 0x0fff;
     }
 
     // Set vx to the value of the delay timer.
     fn execute_opcode_fx07(&mut self) {
         let x = (self.opcode & 0x0f00) >> 8; 
         self.v[x as usize] = self.dt;
-        self.pc += 2;
+        self.pc = (self.pc + 2) & 0x0fff; 
     }
 
     // Wait for a keypress then store it in vx.
@@ -567,7 +566,7 @@ impl Emu {
         for i in 0..self.keys.len() {
             if self.keys[i] {
                 self.v[x as usize] = i as u8;
-                self.pc += 2;
+                self.pc = (self.pc + 2) & 0x0fff; 
             }
         }
     }
@@ -576,14 +575,14 @@ impl Emu {
     fn execute_opcode_fx15(&mut self) {
         let x = (self.opcode & 0x0f00) >> 8;
         self.dt = self.v[x as usize];
-        self.pc += 2;
+        self.pc = (self.pc + 2) & 0x0fff; 
     }
 
     // Set the sound timer to vx.
     fn execute_opcode_fx18(&mut self) {
         let x = (self.opcode & 0x0f00) >> 8;
         self.st = self.v[x as usize];
-        self.pc += 2;
+        self.pc = (self.pc + 2) & 0x0fff; 
     }
 
     // Add vx to ram_idx. Set vf to 1 if there was a range overflow,
@@ -594,7 +593,7 @@ impl Emu {
         let overflowed = sum > 0x0fff;
         self.v[0xf as usize] = if overflowed {1} else {0};
         self.ram_idx = sum % (0x0fff + 1);
-        self.pc += 2;
+        self.pc = (self.pc + 2) & 0x0fff; 
     }
 
     // Set ram_idx to the location of the sprite for the character in vx. 
@@ -603,7 +602,7 @@ impl Emu {
         let x = (self.opcode & 0x0f00) >> 8;
         let fchar = self.v[x as usize];
         self.ram_idx = 0x0000 + (fchar as u16) * 5; 
-        self.pc += 2;
+        self.pc = (self.pc + 2) & 0x0fff; 
     } 
 
     // Set ram_idx to the location of the sprite for the character in vx, where
@@ -613,7 +612,7 @@ impl Emu {
         let x = (self.opcode & 0x0f00) >> 8;
         let fchar = self.v[x as usize];
         self.ram_idx = 0x0000 + (fchar as u16) * 10; 
-        self.pc += 2;
+        self.pc = (self.pc + 2) & 0x0fff; 
     } 
 
     // Store the binary-coded decimal (BCD) representation of vx, with the
@@ -633,7 +632,7 @@ impl Emu {
         self.ram[(self.ram_idx+0) as usize] = hundreds as u8;
         self.ram[(self.ram_idx+1) as usize] = tens as u8;
         self.ram[(self.ram_idx+2) as usize] = ones as u8;
-        self.pc += 2;
+        self.pc = (self.pc + 2) & 0x0fff; 
     }
 
     // Store v0 to vx in memory starting at address ram_idx.
@@ -642,7 +641,7 @@ impl Emu {
         for i in 0..(x as u16) + 1 {
             self.ram[(self.ram_idx+i) as usize] = self.v[i as usize];
         }
-        self.pc += 2;
+        self.pc = (self.pc + 2) & 0x0fff; 
     }
 
     // Fill v0 to vx with values from memory starting at address ram_idx.
@@ -651,7 +650,7 @@ impl Emu {
         for i in 0..(x as u16) + 1 {
             self.v[i as usize] = self.ram[(self.ram_idx+i) as usize];
         }
-        self.pc += 2;
+        self.pc = (self.pc + 2) & 0x0fff; 
     }
 
     // Store v0 to vx in super_mode_rpl_flags user flags (x <= 7).
@@ -660,7 +659,7 @@ impl Emu {
         for i in 0..(cmp::min(x,7) as u16) + 1 {
             self.super_mode_rpl_flags[i as usize] = self.v[i as usize];
         }
-        self.pc += 2;
+        self.pc = (self.pc + 2) & 0x0fff; 
     }
 
     // Fill v0 to vx with values from super_mode_rpl_flags (x <= 7).
@@ -669,7 +668,7 @@ impl Emu {
         for i in 0..(cmp::min(x,7) as u16) + 1 {
             self.v[i as usize] = self.super_mode_rpl_flags[i as usize];
         }
-        self.pc += 2;
+        self.pc = (self.pc + 2) & 0x0fff; 
     }
     
     // Fetch the opcode to which the program counter is pointing.
