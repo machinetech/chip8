@@ -414,7 +414,7 @@ impl Emu {
     // bit of vx before the shift. 
     fn execute_opcode_8xy6(&mut self) {
         let x = (self.opcode & 0x0f00) >> 8; 
-        self.v[0x0f] = self.v[x as usize] & 0x01;
+        self.v[0x0f] = self.v[x as usize] & 0b00000001;
         self.v[x as usize] >>= 1;
         self.pc = (self.pc + 2) & 0x0fff; 
     }
@@ -437,12 +437,12 @@ impl Emu {
     // This implementation mirrors the behavior of the original interpreter.
     // 
     // Store the value of register vy shifted left one bit in register vx.
-    // Set register vf to the least significant bit prior to the shift.
+    // Set register vf to the most significant bit prior to the shift.
     #[allow(dead_code)]
     fn execute_opcode_8xye_orig_not_used(&mut self) {
         let x = (self.opcode & 0x0f00) >> 8; 
         let y = (self.opcode & 0x00f0) >> 4; 
-        self.v[0x0f] = self.v[y as usize] & 0x01;
+        self.v[0x0f] = (self.v[y as usize] >> 7) & 0b00000001;
         self.v[x as usize] = self.v[y as usize] << 1; 
         self.pc = (self.pc + 2) & 0x0fff; 
     }
@@ -461,7 +461,7 @@ impl Emu {
     // of vx before the shift. Notice that vy is completely ignored. 
     fn execute_opcode_8xye(&mut self) {
         let x = (self.opcode & 0x0f00) >> 8; 
-        self.v[0x0f] = self.v[x as usize] & 0x01; 
+        self.v[0x0f] = (self.v[x as usize] >> 7) & 0b00000001; 
         self.v[x as usize] <<= 1; 
         self.pc = (self.pc + 2) & 0x0fff; 
     }
@@ -1270,80 +1270,68 @@ mod tests {
     }
 
     #[test]
-    fn test_opcode_8xye_least_significant_bit_not_set() {
+    fn test_opcode_8xye_most_significant_bit_not_set() {
         let mut emu = Emu::new();
         //given
         emu.pc = 0x0000;
-        emu.v[0x0a] = 0x04;
-        emu.v[0x0b] = 0x07;
+        emu.v[0x0a] = 0b01111111_u8;
+        emu.v[0x0b] = 0b11111111_u8;
         //when
         emu.opcode = 0x8abe;
         emu.decode_and_execute_opcode();
         //then
-        assert_eq!(0x08, 0x04 << 1);
-        assert_eq!(0x08, emu.v[0x0a]);
-        assert_eq!(0x07, emu.v[0x0b]);
-        assert_eq!(0x00, 0x04 & 0x01);
+        assert_eq!(0b11111110_u8, emu.v[0x0a]);
         assert_eq!(0x00, emu.v[0x0f]);
         assert_eq!(0x0000+2, emu.pc);
     }
 
     #[test]
-    fn test_opcode_8xye_least_significant_bit_set() {
+    fn test_opcode_8xye_most_significant_bit_set() {
         let mut emu = Emu::new();
         //given
         emu.pc = 0x0000;
-        emu.v[0x0a] = 0x07;
-        emu.v[0x0b] = 0x04;
+        emu.v[0x0a] = 0b11111111_u8;
+        emu.v[0x0b] = 0b01111111_u8;
         //when
         emu.opcode = 0x8abe;
         emu.decode_and_execute_opcode();
         //then
-        assert_eq!(0x0e, 0x07 << 1);
-        assert_eq!(0x0e, emu.v[0x0a]);
-        assert_eq!(0x04, emu.v[0x0b]);
-        assert_eq!(0x01, 0x07 & 0x01);
+        assert_eq!(0b11111110_u8, emu.v[0x0a]);
         assert_eq!(0x01, emu.v[0x0f]);
         assert_eq!(0x0000+2, emu.pc);
-    }
+   }
 
     #[test]
-    fn test_opcode_8xye_orig_not_used_least_significant_bit_not_set() {
+    fn test_opcode_8xye_orig_not_used_most_significant_bit_not_set() {
         let mut emu = Emu::new();
         //given
         emu.pc = 0x0000;
-        emu.v[0x0a] = 0x07;
-        emu.v[0x0b] = 0x04;
+        emu.v[0x0a] = 0b11111111_u8;
+        emu.v[0x0b] = 0b01111111_u8;
         //when
         emu.opcode = 0x8abe;
         emu.execute_opcode_8xye_orig_not_used();
         //then
-        assert_eq!(0x08, 0x04 << 1);
-        assert_eq!(0x08, emu.v[0x0a]);
-        assert_eq!(0x04, emu.v[0x0b]);
-        assert_eq!(0x00, emu.v[0x0b] & 0x01);
+        assert_eq!(0b11111110_u8, emu.v[0x0a]);
         assert_eq!(0x00, emu.v[0x0f]);
         assert_eq!(0x0000+2, emu.pc);
-    }
+   }
 
     #[test]
-    fn test_opcode_8xye_orig_not_used_least_significant_bit_set() {
+    fn test_opcode_8xye_orig_not_used_most_significant_bit_set() {
         let mut emu = Emu::new();
         //given
         emu.pc = 0x0000;
-        emu.v[0x0a] = 0x04;
-        emu.v[0x0b] = 0x07;
+        emu.v[0x0a] = 0b01111111_u8;
+        emu.v[0x0b] = 0b11111111_u8;
         //when
         emu.opcode = 0x8abe;
         emu.execute_opcode_8xye_orig_not_used();
         //then
-        assert_eq!(0x0e, 0x07 << 1);
-        assert_eq!(0x0e, emu.v[0x0a]);
-        assert_eq!(0x07, emu.v[0x0b]);
-        assert_eq!(0x01, emu.v[0x0b] & 0x01);
+        assert_eq!(0b11111110_u8, emu.v[0x0a]);
         assert_eq!(0x01, emu.v[0x0f]);
         assert_eq!(0x0000+2, emu.pc);
-    }
+   }
 
     #[test]
     fn test_opcode_9xy0_vx_does_not_match_vy() {
