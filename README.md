@@ -8,6 +8,10 @@ Brix
 
 There is also a short video clip of the game on [YouTube](http://www.youtube.com/watch?v=V3jA3SWWKOg).
 
+Blinky
+---
+![blinky.png](http://wm9.github.io/chip8/images/blinky.png "Blinky Title")
+
 Space Invaders
 ---
 ![space_invaders_title.png](http://wm9.github.io/chip8/images/space_invaders_title.png "Space Invaders Title")
