@@ -389,8 +389,6 @@ impl Emu {
     //
     // Store the value of register vy shifted right one bit in register vx.
     // Set register vf to the least significant bit prior to the shift.
-    // Note: There is some difference in opinion on how this opcode should
-    // be implemented. See http://mattmik.com/emu.html 
     #[allow(dead_code)]
     fn execute_opcode_8xy6_orig_not_used(&mut self) {
         let x = (self.opcode & 0x0f00) >> 8; 
