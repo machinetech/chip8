@@ -49,7 +49,7 @@ Ant
 ## Requirements
 
 ### RUST
-The emulator compiles against the master branch of Rust. See the section in the official Rust Book for [installing](http://doc.rust-lang.org/nightly/book/installing-rust.html) the Rust binaries, including the Rust package manager Cargo. 
+The emulator compiles against the master branch of Rust. See the Rust documentation for installation of the Rust binaries, including the Rust package manager Cargo.  
 
 ### SDL2
 The emulator uses the cross platform media library [SDL2](https://www.libsdl.org/) for access to audio, keyboard and graphics hardware. Windows and Mac OSX binaries are available for [download](https://www.libsdl.org/download-2.0.php) from the SDL website. 
@@ -59,12 +59,6 @@ The emulator uses the cross platform media library [SDL2](https://www.libsdl.org
 ```
 sudo apt-get install libsdl2-dev
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/lib"
-```
-**MacPorts**:  
-
-```
-sudo port install libsdl2  
-export LIBRARY_PATH="${LIBRARY_PATH}:/opt/local/lib"
 ```
 
 **HomeBrew**:  
