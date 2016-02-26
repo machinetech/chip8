@@ -54,6 +54,14 @@ const SUPER_MODE_FONT_MAP: [u8; 10 * 16] = [
 ];
 
 pub struct Emu {
+    
+    // Unlike a typical Intel processor, that uses little endian order for multi byte data types,
+    // the CHIP8 processor uses big endian order. This is important when creating a multi byte 
+    // types (such as u16) by combining individual bytes. For instance, when reading an opcode
+    // by combining two bytes.
+    //
+    // For more on endiannes, see http://www.geeksforgeeks.org/little-and-big-endian-mystery/
+    
     // Can run in one of two modes: STANDARD or SUPER.
     pub mode: Mode,
     // Graphics pixel is either set or not. 
@@ -673,6 +681,7 @@ impl Emu {
     fn fetch_opcode(&mut self) {
         let hbyte = self.ram[self.pc as usize];
         let lbyte = self.ram[self.pc as usize + 1];
+        // Uses big-endiannes for multi byte data types.
         self.opcode = (hbyte as u16) << 8 | lbyte as u16; 
     }
                 
