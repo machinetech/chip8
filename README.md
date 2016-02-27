@@ -1,50 +1,50 @@
-# CHIP-8 [![Build Status](https://travis-ci.org/wickus/chip8.svg)](https://travis-ci.org/wickus/chip8)
-A [CHIP-8](http://en.wikipedia.org/wiki/CHIP-8) and Super CHIP-8 (SCHIP) emulator written in the [Rust](http://www.rust-lang.org/) programming language. A few sample game screenshots below. The project uses the [MIT](https://github.com/wickus/chip8/blob/master/LICENSE) license.
+# CHIP-8 [![Build Status](https://travis-ci.org/machinetech/chip8.svg)](https://travis-ci.org/machinetech/chip8)
+A [CHIP-8](http://en.wikipedia.org/wiki/CHIP-8) and Super CHIP-8 (SCHIP) emulator written in the [Rust](http://www.rust-lang.org/) programming language. A few sample game screenshots below. The project uses the [MIT](https://github.com/machinetech/chip8/blob/master/LICENSE) license.
 
 Brix
 --- 
 
-[![Brix](http://wickus.github.io/chip8/images/brix.png)](http://www.youtube.com/watch?v=V3jA3SWWKOg)
+[![Brix](http://machinetech.github.io/chip8/images/brix.png)](http://www.youtube.com/watch?v=V3jA3SWWKOg)
 
 There is also a short video clip of the game on [YouTube](http://www.youtube.com/watch?v=V3jA3SWWKOg).
 
 Blinky
 ---
-![blinky.png](http://wickus.github.io/chip8/images/blinky.png "Blinky Title")
+![blinky.png](http://machinetech.github.io/chip8/images/blinky.png "Blinky Title")
 
 Space Invaders
 ---
-![space_invaders_title.png](http://wickus.github.io/chip8/images/space_invaders_title.png "Space Invaders Title")
+![space_invaders_title.png](http://machinetech.github.io/chip8/images/space_invaders_title.png "Space Invaders Title")
 
-![space_invaders.png](http://wickus.github.io/chip8/images/space_invaders.png "Space Invaders")
+![space_invaders.png](http://machinetech.github.io/chip8/images/space_invaders.png "Space Invaders")
 
 Pong
 ---
-![pong.png](http://wickus.github.io/chip8/images/pong.png "Pong")
+![pong.png](http://machinetech.github.io/chip8/images/pong.png "Pong")
 
 Tetris
 ---
-![tetris.png](http://wickus.github.io/chip8/images/tetris.png "Tetris")
+![tetris.png](http://machinetech.github.io/chip8/images/tetris.png "Tetris")
 
 H.Piper
 ---
-![hpiper.png](http://wickus.github.io/chip8/images/hpiper.png "HPiper")
+![hpiper.png](http://machinetech.github.io/chip8/images/hpiper.png "HPiper")
 
 Car
 ---
-![car.png](http://wickus.github.io/chip8/images/car.png "Car")
+![car.png](http://machinetech.github.io/chip8/images/car.png "Car")
 
 Super Trip
 ---
-![super_trip.png](http://wickus.github.io/chip8/images/super_trip.png "Super Trip")
+![super_trip.png](http://machinetech.github.io/chip8/images/super_trip.png "Super Trip")
 
 Super Worm
 ---
-![super_worm.png](http://wickus.github.io/chip8/images/super_worm.png "Super Worm")
+![super_worm.png](http://machinetech.github.io/chip8/images/super_worm.png "Super Worm")
 
 Ant
 ---
-![ant.png](http://wickus.github.io/chip8/images/ant.png "Ant")
+![ant.png](http://machinetech.github.io/chip8/images/ant.png "Ant")
 
 ## Requirements
 
@@ -101,10 +101,10 @@ Below are some additional keypresses that are also not in the official specifica
 | Esc | Exit |
 
 ## Code diagram
-![pong.png](http://wickus.github.io/chip8/images/code_diagram.jpeg "Code diagram")
+![pong.png](http://machinetech.github.io/chip8/images/code_diagram.jpeg "Code diagram")
 
 ## Reporting problems
-If anything should go wrong, please report the issue [here](https://github.com/wickus/chip8/issues) and I will look into it. Thanks!
+If anything should go wrong, please report the issue [here](https://github.com/machinetech/chip8/issues) and I will look into it. Thanks!
 
 ## References
 * [Cowgod's Chip-8 Technical Reference](http://devernay.free.fr/hacks/chip8/C8TECH10.HTM)   

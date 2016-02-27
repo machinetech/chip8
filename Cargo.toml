@@ -3,7 +3,6 @@ name = "chip8"
 description = "A CHIP-8 emulator written in Rust"
 version = "1.0.2"
 license = "MIT"
-authors = ["wickus.martin <wickus.martin@gmail.com>"]
 keywords = ["chip8"]
 
 [[bin]]
