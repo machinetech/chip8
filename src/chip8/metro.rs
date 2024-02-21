@@ -10,11 +10,11 @@ impl Metronome {
     
     pub fn new(hz: i64) -> Metronome {
         let freq = Metronome::hz_to_duration(hz);
-        Metronome { freq: freq, ticked_at: SteadyTime::now() }
+        Metronome { freq, ticked_at: SteadyTime::now() }
     }
 
     pub fn on_tick<F>(&mut self, mut f: F) 
-        where F: FnMut() -> () {
+        where F: FnMut() {
         let now = SteadyTime::now();
         if now - self.ticked_at >= self.freq {
             self.ticked_at = now;

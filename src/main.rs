@@ -44,7 +44,8 @@ fn ui_exec(mut ui: Ui, tx: Sender<UiToEmuMsg>, rx: Receiver<EmuToUiMsg>) {
             break 'ui_exec_loop;
         }
         // Short sleep to free up cpu cycles
-        thread::sleep_ms(1);    
+        let dur = std::time::Duration::from_millis(1);
+        std::thread::sleep(dur);    
     }
 }
 
@@ -98,24 +99,23 @@ fn process_key_presses(ui: &mut Ui, tx: &Sender<UiToEmuMsg>,
 // earlier quit signal. 
 fn process_emu_events(ui: &mut Ui, rx: &Receiver<EmuToUiMsg>, paused: &bool, 
                       refresh_gfx_rate: &mut Metronome) -> bool {
-    match rx.try_recv() {
-        Ok(emu_event) => {
-            match emu_event {
-                // Handle beeb state change signalled by emulator.
-                EmuToUiMsg::Beeping(on) => ui.beep(on),
-                // Handle draw event signalled by emulator.
-                EmuToUiMsg::Draw(ref mode, ref gfx) => {
-                    refresh_gfx_rate.on_tick(|| {
-                        if !*paused { ui.refresh_gfx(*mode, gfx); }
-                    });
-                },
-                // Emulator has acknowledged the earlier quit signal.
-                // The ui thread may shutdown in response.
-                EmuToUiMsg::QuitAck => return true,
-            }
-        },
-        _ => {},
-    } 
+
+    if let Ok(emu_event) = rx.try_recv() {
+        match emu_event {
+            // Handle beeb state change signalled by emulator.
+            EmuToUiMsg::Beeping(on) => ui.beep(on),
+            // Handle draw event signalled by emulator.
+            EmuToUiMsg::Draw(ref mode, ref gfx) => {
+                refresh_gfx_rate.on_tick(|| {
+                    if !*paused { ui.refresh_gfx(*mode, gfx); }
+                });
+            },
+            // Emulator has acknowledged the earlier quit signal.
+            // The ui thread may shutdown in response.
+            EmuToUiMsg::QuitAck => return true,
+        }
+    }
+
     false
 }
 
@@ -136,7 +136,8 @@ fn emu_exec(mut emu: Emu, tx: Sender<EmuToUiMsg>, rx: Receiver<UiToEmuMsg>) {
         update_timers(&mut emu, &tx, &paused, &mut beeping, 
                       &mut update_timers_rate);
         // Short sleep to free up cpu cycles
-        thread::sleep_ms(1);    
+        let dur = std::time::Duration::from_millis(1);
+        std::thread::sleep(dur);   
     }
 }
 
@@ -168,7 +169,7 @@ fn signal_draw_event(emu: &mut Emu, tx: &Sender<EmuToUiMsg>, paused: &bool,
                      clock_rate: &mut Metronome) {
     clock_rate.on_tick(|| {
         if !paused {
-            &mut emu.execute_cycle();
+            let _ = &mut emu.execute_cycle();
             if emu.draw {
                 tx.send(EmuToUiMsg::Draw(emu.mode, Box::new(emu.gfx))).unwrap();
                 emu.draw = false;

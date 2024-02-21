@@ -132,7 +132,7 @@ impl Default for Emu {
     
     fn default() -> Self {
         let mut emu = Emu {
-            mode: Mode::STANDARD,
+            mode: Mode::Standard,
             opcode: 0,
             ram: [0; RAM_SIZE],  
             v: [0; NUM_REGISTERS],
@@ -200,22 +200,22 @@ impl Emu {
     // Indicates whether the state justifies a beep at this
     // exact time.
     pub fn beeping(&self) -> bool {
-        return self.st > 0;
+        self.st > 0
     }
     
     // Return the gfx width.
     fn width(&self) -> usize {
         match self.mode {
-            Mode::STANDARD => SMALL_GFX_W,
-            Mode::SUPER => GFX_W
+            Mode::Standard => SMALL_GFX_W,
+            Mode::Super => GFX_W
         }
     }
 
     // Return the gfx height.
     fn height(&self) -> usize {
         match self.mode {
-            Mode::STANDARD => SMALL_GFX_H,
-            Mode::SUPER => GFX_H
+            Mode::Standard => SMALL_GFX_H,
+            Mode::Super => GFX_H
         }
     }
    
@@ -273,13 +273,13 @@ impl Emu {
     
     // Disable SUPER mode. 
     fn execute_opcode_00fe(&mut self) {
-        self.mode = Mode::STANDARD;
+        self.mode = Mode::Standard;
         self.pc = (self.pc + 2) & 0x0fff; 
     } 
     
     // Enable SUPER mode. 
     fn execute_opcode_00ff(&mut self) {
-        self.mode = Mode::SUPER;
+        self.mode = Mode::Super;
         self.pc = (self.pc + 2) & 0x0fff; 
     } 
     
@@ -508,7 +508,7 @@ impl Emu {
         let gfx_start_x = self.v[(self.opcode as usize & 0x0f00) >> 8] as usize;
         let gfx_start_y = self.v[(self.opcode as usize & 0x00f0) >> 4] as usize;
         let n = (self.opcode & 0x000f) as usize; 
-        let sprt_w = if n == 0 && self.mode == Mode::SUPER {16} else {8};
+        let sprt_w = if n == 0 && self.mode == Mode::Super {16} else {8};
         let sprt_h = if n == 0 {16} else {n};
         let sprt_bytes_per_row = sprt_w / 8; 
         self.v[0x0f] = 0x00;
@@ -859,12 +859,12 @@ mod tests {
         let mut emu = Emu::new();
         //given
         emu.pc = 0x0aaa; 
-        emu.mode = Mode::SUPER;
+        emu.mode = Mode::Super;
         //when
         emu.opcode = 0x00fe;
         emu.decode_and_execute_opcode();
         //then
-        assert_eq!(Mode::STANDARD, emu.mode);
+        assert_eq!(Mode::Standard, emu.mode);
         assert_eq!(0x0aaa+2, emu.pc);
     }
 
@@ -873,12 +873,12 @@ mod tests {
         let mut emu = Emu::new();
         //given
         emu.pc = 0x0aaa; 
-        emu.mode = Mode::STANDARD;
+        emu.mode = Mode::Standard;
         //when
         emu.opcode = 0x00ff;
         emu.decode_and_execute_opcode();
         //then
-        assert_eq!(Mode::SUPER, emu.mode);
+        assert_eq!(Mode::Super, emu.mode);
         assert_eq!(0x0aaa+2, emu.pc);
     }
 
