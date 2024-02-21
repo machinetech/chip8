@@ -10,7 +10,7 @@ name = "chip8"
 path = "src/main.rs"
 
 [dependencies]
-sdl2 = "0.9.1"
+sdl2 = "0.36.0"
 rand = "0.3.11"
 time = "0.1.32"
 serde = "1.0" # Adding serde

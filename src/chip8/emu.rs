@@ -753,7 +753,7 @@ impl Emu {
     }
     
     fn unknown_opcode(&self) -> ! {
-        panic!(format!("Unknown opcode: {:x}", self.opcode));    
+        panic!("Unknown opcode: {:x}", self.opcode);    
     }
 
 }

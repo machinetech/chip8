@@ -1,12 +1,13 @@
 use sdl2;
-use sdl2::audio::{AudioCallback,AudioDevice,AudioSpecDesired};
+use sdl2::audio::{AudioCallback, AudioDevice, AudioSpecDesired};
 use sdl2::event::Event;
-use sdl2::pixels::Color::RGB;
+use sdl2::pixels::Color;
 use sdl2::rect::Rect;
-use sdl2::render::Renderer;
+use sdl2::render::Canvas;
+use sdl2::video::Window;
 use sdl2::keyboard::Scancode;
 use sdl2::Sdl;
-use super::{GFX_H,GFX_W,Mode,wav};
+use super::{GFX_H, GFX_W, Mode, wav};
 
 const SCALE: usize = 8;
 
@@ -32,7 +33,7 @@ impl AudioCallback for BeepCallback {
 
 pub struct Ui {
     sdl_ctx: Sdl,
-    renderer: Renderer<'static>,
+    canvas: Canvas<Window>,
     audio: AudioDevice<BeepCallback>,
 }
 
@@ -48,7 +49,7 @@ impl Ui {
                                     .build()
                                     .unwrap();
 
-        let renderer = window.renderer().build().unwrap(); 
+        let canvas = window.into_canvas().build().unwrap();
         
         let audio_subsystem = sdl_ctx.audio().unwrap();
         let audio_spec = AudioSpecDesired {
@@ -57,11 +58,11 @@ impl Ui {
             samples: Some(wav::SAMPLES as u16)
         };
     
-        let audio = audio_subsystem.open_playback(None, audio_spec, |_| {
+        let audio = audio_subsystem.open_playback(None, &audio_spec, |_| {
             BeepCallback::new()
         }).unwrap();
 
-        Ui { sdl_ctx: sdl_ctx, renderer: renderer, audio: audio } 
+        Ui { sdl_ctx, canvas, audio }
     }
 
     pub fn beep(&self, on: bool) {
@@ -72,8 +73,8 @@ impl Ui {
     }
 
     pub fn refresh_gfx(&mut self, mode: Mode, gfx: &[[bool; GFX_H]; GFX_W]) {
-        let bg = RGB(0x1c, 0x28, 0x41);
-        let fg = RGB(0xff, 0xff, 0xff);
+        let bg = Color::RGB(0x1c, 0x28, 0x41);
+        let fg = Color::RGB(0xff, 0xff, 0xff);
         let projection_factor = match mode { 
             //
             // For STANDARD mode, the 64x32 gfx subscreen will be projected 
@@ -99,12 +100,12 @@ impl Ui {
                 let ry = (y * projection_factor) as i32;
                 let rw = projection_factor as u32;
                 let rh = projection_factor as u32;
-                let rect = Rect::new(rx, ry, rw, rh).unwrap().unwrap();
-                self.renderer.set_draw_color(color);
-                self.renderer.fill_rect(rect);
+                let rect = Rect::new(rx, ry, rw, rh);
+                self.canvas.set_draw_color(color);
+                self.canvas.fill_rect(rect).expect("Failed to draw rect");
             }
         }
-        self.renderer.present();
+        self.canvas.present();
     } 
     
     pub fn poll_event(&self) -> Option<Event> {
